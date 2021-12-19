@@ -4,7 +4,7 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}/**",
-                "${workspaceFolder}/libs/riscvvm/include",
+                "${workspaceFolder}/libs/rvvm/include",
                 "${workspaceFolder}/libs/xutils/include"
             ],
             "defines": [
