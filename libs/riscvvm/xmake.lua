@@ -1,4 +1,4 @@
-set_target("riscvvm")
-    set_target("static")
-    add_cfiles("src/*.cc")
+target("riscvvm")
+    set_kind("static")
+    add_files("src/*.cc")
     add_includedirs("include", {public=true})
