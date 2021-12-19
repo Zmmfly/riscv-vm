@@ -1,18 +1,21 @@
 {
     "configurations": [
         {
-            "name": "Win32",
+            "name": "Linux",
             "includePath": [
-                "${workspaceFolder}/**"
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/libs/riscvvm/include",
+                "${workspaceFolder}/libs/xutils/include"
             ],
             "defines": [
                 "_DEBUG",
                 "UNICODE",
                 "_UNICODE"
             ],
-            "windowsSdkVersion": "10.0.19041.0",
-            "intelliSenseMode": "windows-gcc-x64",
-            "compilerPath": "${env:GCC_MINGW_HOME}/bin/gcc.exe"
+            "intelliSenseMode": "linux-clang-x64",
+            "compilerPath": "/usr/bin/clang",
+            "cStandard": "c99",
+            "cppStandard": "c++11"
         }
     ],
     "version": 4
