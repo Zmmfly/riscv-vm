@@ -12,7 +12,7 @@ class rv32_instruction_impl
 {
     public:
         virtual std::string name() = 0;
-        virtual bool execute(periphs_t &periphs, uint32_t instruction, uint32_t &used_cycle)     = 0;
+        virtual bool execute(rv32_periph_collect &periphs, uint32_t instruction, uint32_t &used_cycle)     = 0;
 };
 }
 
