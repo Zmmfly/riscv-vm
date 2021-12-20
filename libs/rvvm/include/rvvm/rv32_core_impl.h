@@ -6,6 +6,7 @@ namespace rvvm
 
 class rv32_core_impl
 {
+    public:
 };
 
 }

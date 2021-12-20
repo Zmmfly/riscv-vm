@@ -11,9 +11,9 @@ namespace rvvm
 class rv32_instruction_impl
 {
     public:
-        virtual bool had_instruction(uint32_t ins)                                                     = 0;
-        virtual std::string name()                                                                     = 0;
-        virtual bool execute(rv32_periph_collect &periphs, uint32_t instruction, uint32_t &used_cycle) = 0;
+        virtual bool had_instruction(uint32_t ins)                                                                           = 0;
+        virtual std::string name()                                                                                           = 0;
+        virtual bool execute(rv32_registers &regs, rv32_periph_collect &periphs, uint32_t instruction, uint32_t &used_cycle) = 0;
 };
 
 class rv32_instruction_collect
