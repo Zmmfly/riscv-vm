@@ -55,6 +55,8 @@ class rv32_registers
         uint32_t cycle;
         rv32_registers();
         ~rv32_registers();
+        uint32_t read(uint8_t reg);
+        void write(uint8_t reg, uint32_t in);
 };
 
 }

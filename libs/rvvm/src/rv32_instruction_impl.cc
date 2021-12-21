@@ -3,6 +3,16 @@
 namespace rvvm
 {
 
+uint32_t rv32_sext(uint32_t in, uint8_t bits)
+{
+    uint32_t out = in;
+    if (in & (1 << (bits - 1)))
+    {
+        out |= (0xFFFFFFFF << bits);
+    }
+    return out;
+}
+
 rv32_instruction_collect::rv32_instruction_collect()
 {}
 
@@ -23,7 +33,13 @@ bool rv32_instruction_collect::had_instruction(rv32_ins_t ins)
             return true;
         }
     }
+    m_error = true;
     return false;
+}
+
+bool rv32_instruction_collect::had_error()
+{
+    return m_error;
 }
 
 void rv32_instruction_collect::add(rv32_instruction_impl *ins)
@@ -37,7 +53,8 @@ bool rv32_instruction_collect::execute(rv32_registers &regs, rv32_periph_collect
     {
         if (instruction->had_instruction(ins))
         {
-            return instruction->execute(regs, periphs, ins, used_cycle);
+            m_error = instruction->execute(regs, periphs, ins, used_cycle);
+            return !m_error;
         }
     }
     return false;

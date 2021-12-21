@@ -9,7 +9,7 @@
 namespace rvvm
 {
 
-
+uint32_t rv32_sext(uint32_t in, uint8_t bits);
 
 class rv32_instruction_impl
 {
@@ -26,10 +26,12 @@ class rv32_instruction_collect
         ~rv32_instruction_collect();
 
         bool had_instruction(rv32_ins_t ins);
+        bool had_error();
         void add(rv32_instruction_impl *instruction);
         bool execute(rv32_registers &regs, rv32_periph_collect &periphs, rv32_ins_t instruction, uint32_t &used_cycle);
 
     private:
+        bool m_error = false;
         std::vector<rv32_instruction_impl *> m_collect;
 };
 

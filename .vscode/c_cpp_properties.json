@@ -4,6 +4,7 @@
             "name": "Win32",
             "includePath": [
                 "${workspaceFolder}/**",
+                "${workspaceFolder}/include/**",
                 "${workspaceFolder}/libs/rvvm/include",
                 "${workspaceFolder}/libs/xutils/include",
                 "${env:GCC_MINGW_HOME}/lib/gcc/x86_64-w64-mingw32/8.1.0/include",
@@ -25,6 +26,7 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}/**",
+                "${workspaceFolder}/include/**",
                 "${workspaceFolder}/libs/rvvm/include",
                 "${workspaceFolder}/libs/xutils/include"
             ],

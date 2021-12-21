@@ -27,16 +27,31 @@ namespace rvvm
                     uint32_t rd:5;
                     uint32_t funct3:3;
                     uint32_t rs1:5;
-                    uint32_t imm_i:12;
+                    union
+                    {
+                        uint32_t imm:12;
+                        uint32_t offset:12;
+                        struct
+                        {
+                            uint32_t shamt:5;
+                            uint32_t funct7:7;
+                        };
+                    };
                 }I;
 
                 struct
                 {
-                    uint32_t imm_4_0:5;
+                    union{
+                        uint32_t imm_4_0:5;
+                        uint32_t offset_4_0:5;
+                    };
                     uint32_t func3:3;
                     uint32_t rs1:5;
                     uint32_t rs2:5;
-                    uint32_t imm_11_5:6;
+                    union{
+                        uint32_t imm_11_5:6;
+                        uint32_t offset_11_5:6;
+                    };
                 }S;
 
                 struct
@@ -59,10 +74,15 @@ namespace rvvm
                 struct
                 {
                     uint32_t rd:5;
-                    uint32_t imm_19_12:8;
-                    uint32_t imm_11:1;
-                    uint32_t imm_10_1:10;
-                    uint32_t imm_20:1;
+                    union{
+                        uint32_t offset:20;
+                        struct{
+                            uint32_t imm_19_12:8;
+                            uint32_t imm_11:1;
+                            uint32_t imm_10_1:10;
+                            uint32_t imm_20:1;
+                        };
+                    };
                 }J;
             };
         };
