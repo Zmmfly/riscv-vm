@@ -1,5 +1,6 @@
 ## RISC-V Virtual machine
 This project create a riscv vm by C++. It's only for study riscv instruction.
+In currently, just only support single core.
 
 ## Status
 
@@ -11,11 +12,11 @@ This project create a riscv vm by C++. It's only for study riscv instruction.
 ## Plan
 
 ### Overall
-- [ ] VM Framework
+- [x] VM Framework
 - [x] Instruction impl
 - [x] Peripheral impl
-- [ ] Instruction
-- [ ] Peripheral
+- [ ] Instruction base
+- [ ] Peripheral base
 
 ### Instruction
 

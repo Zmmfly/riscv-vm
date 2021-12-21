@@ -1,2 +1,2 @@
 includes("xutils")
--- includes("riscvvm")
+includes("rvvm")
