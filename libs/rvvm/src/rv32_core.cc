@@ -3,8 +3,8 @@
 namespace rvvm
 {
 
-rv32_core::rv32_core(rv32_instruction_collect &instruction_collect, rv32_registers &regs, rv32_periph_collect &periphs)
-    : m_instruction_collect(instruction_collect), m_regs(regs), m_periphs(periphs)
+rv32_core::rv32_core(rv32_instruction_collect &ins_collect, rv32_csr_collect &ins_csrs, rv32_registers &in_regs, rv32_periph_collect &in_periphs)
+    : instructions(ins_collect), regs(in_regs), periphs(in_periphs), csrs(ins_csrs)
 {
 }
 
@@ -45,16 +45,16 @@ void rv32_core::run()
     rv32_ins_t ins;
 
     m_running = true;
-    m_regs.pc = pc_start;
+    regs.pc = pc_start;
     while (!m_require_stop)
     {
-        if ( !m_periphs.read(m_regs.pc, ins.value, used_cycle) )
+        if ( !periphs.rd_u32(regs.pc, ins.value, used_cycle) )
         {
             m_running = false;
             break;
         }
 
-        if ( !m_instruction_collect.execute(m_regs, m_periphs, ins, used_cycle) )
+        if ( !instructions.execute(*this, ins, used_cycle) )
         {
             m_running = false;
             printf("rv32_core::run() failed to execute instruction.\n");
