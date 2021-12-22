@@ -9,7 +9,6 @@ rv32_registers::rv32_registers()
 {
     memset(x, 0, sizeof(x));
     pc    = 0;
-    cycle = 0;
 }
 
 rv32_registers::~rv32_registers()
