@@ -1,4 +1,5 @@
 #include "rvvm/rv32_instruction_impl.h"
+#include "rvvm/rv32_core.h"
 
 namespace rvvm
 {
@@ -47,13 +48,13 @@ void rv32_instruction_collect::add(rv32_instruction_impl *ins)
     m_collect.push_back(ins);
 }
 
-bool rv32_instruction_collect::execute(rv32_registers &regs, rv32_periph_collect &periphs, rv32_ins_t ins, uint32_t &used_cycle)
+bool rv32_instruction_collect::execute(rv32_core &core, rv32_ins_t ins, uint32_t &used_cycle)
 {
     for (auto &instruction : m_collect)
     {
         if (instruction->had_instruction(ins))
         {
-            m_error = instruction->execute(regs, periphs, ins, used_cycle);
+            m_error = instruction->execute(core, ins, used_cycle);
             return !m_error;
         }
     }

@@ -9,6 +9,8 @@
 namespace rvvm
 {
 
+class rv32_core;
+
 uint32_t rv32_sext(uint32_t in, uint8_t bits);
 
 class rv32_instruction_impl
@@ -16,7 +18,7 @@ class rv32_instruction_impl
     public:
         virtual bool had_instruction(rv32_ins_t ins)                                                                           = 0;
         virtual std::string name()                                                                                             = 0;
-        virtual bool execute(rv32_registers &regs, rv32_periph_collect &periphs, rv32_ins_t instruction, uint32_t &used_cycle) = 0;
+        virtual bool execute(rv32_core &core, rv32_ins_t instruction, uint32_t &used_cycle) = 0;
 };
 
 class rv32_instruction_collect
@@ -28,7 +30,7 @@ class rv32_instruction_collect
         bool had_instruction(rv32_ins_t ins);
         bool had_error();
         void add(rv32_instruction_impl *instruction);
-        bool execute(rv32_registers &regs, rv32_periph_collect &periphs, rv32_ins_t instruction, uint32_t &used_cycle);
+        bool execute(rv32_core &core, rv32_ins_t instruction, uint32_t &used_cycle);
 
     private:
         bool m_error = false;

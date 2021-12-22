@@ -2,7 +2,7 @@
 
 using namespace rvvm;
 
-#define idec(name) void RV32I::i_##name(rv32_registers &regs, rv32_periph_collect &periphs, rv32_ins_t ins, uint32_t &used_cycle)
+#define idec(name) void RV32I::i_##name(rvvm::rv32_core &core, rv32_ins_t ins, uint32_t &used_cycle)
 
 RV32I::RV32I()
 {}
@@ -105,7 +105,7 @@ std::string RV32I::name()
     return "RV32I";
 }
 
-bool RV32I::execute(rv32_registers &regs, rv32_periph_collect &periphs, rv32_ins_t ins, uint32_t &used_cycle)
+bool RV32I::execute(rvvm::rv32_core &core, rv32_ins_t ins, uint32_t &used_cycle)
 {
     switch (ins.opcode)
     {
@@ -116,7 +116,7 @@ idec(lui)
 {
     uint32_t value = ins.U.imm_31_12;
     value <<= 12;
-    regs.write(ins.U.rd, value);
+    core.regs.write(ins.U.rd, value);
     used_cycle  = 1;
 }
 
@@ -124,24 +124,24 @@ idec(auipc)
 {
     uint32_t value = ins.U.imm_31_12;
     value <<= 12;
-    value += regs.pc;
-    regs.write(ins.U.rd, value);
-    regs.pc    += 4;
+    value += core.regs.pc;
+    core.regs.write(ins.U.rd, value);
+    core.regs.pc    += 4;
     used_cycle  = 1;
 }
 
 idec(jal)
 {
-    regs.write(ins.J.rd, regs.pc + 4);
-    regs.pc += rv32_sext(ins.J.offset, 12);
+    core.regs.write(ins.J.rd, core.regs.pc + 4);
+    core.regs.pc += rv32_sext(ins.J.offset, 12);
     used_cycle  = 1;
 }
 
 idec(jalr)
 {
-    uint32_t t = regs.pc + 4;
-    regs.pc = (regs.read(ins.I.rs1) + rv32_sext(ins.I.offset, 12)) & 0xFFFFFFFE;
-    regs.write(ins.I.rd, t);
+    uint32_t t = core.regs.pc + 4;
+    core.regs.pc = (core.regs.read(ins.I.rs1) + rv32_sext(ins.I.offset, 12)) & 0xFFFFFFFE;
+    core.regs.write(ins.I.rd, t);
     used_cycle  = 1;
 }
 
@@ -156,9 +156,9 @@ idec(beq)
     offset <<= 4;
     offset |= ins.B.imm_4_1;
     offset <<= 1;
-    if (regs.read(ins.B.rs1) == regs.read(ins.B.rs2))
+    if (core.regs.read(ins.B.rs1) == core.regs.read(ins.B.rs2))
     {
-        regs.pc += rv32_sext(offset, 13);
+        core.regs.pc += rv32_sext(offset, 13);
         used_cycle  = 1;
     }
     else
@@ -178,9 +178,9 @@ idec(bne)
     offset <<= 4;
     offset |= ins.B.imm_4_1;
     offset <<= 1;
-    if (regs.read(ins.B.rs1) != regs.read(ins.B.rs2))
+    if (core.regs.read(ins.B.rs1) != core.regs.read(ins.B.rs2))
     {
-        regs.pc += rv32_sext(offset, 13);
+        core.regs.pc += rv32_sext(offset, 13);
         used_cycle  = 1;
     }
     else
@@ -200,9 +200,9 @@ idec(blt)
     offset <<= 4;
     offset |= ins.B.imm_4_1;
     offset <<= 1;
-    if ((int32_t)regs.read(ins.B.rs1) < (int32_t)regs.read(ins.B.rs2))
+    if ((int32_t)core.regs.read(ins.B.rs1) < (int32_t)core.regs.read(ins.B.rs2))
     {
-        regs.pc += rv32_sext(offset, 13);
+        core.regs.pc += rv32_sext(offset, 13);
         used_cycle  = 1;
     }
     else
@@ -222,14 +222,15 @@ idec(bge)
     offset <<= 4;
     offset |= ins.B.imm_4_1;
     offset <<= 1;
-    if ((int32_t)regs.read(ins.B.rs1) >= (int32_t)regs.read(ins.B.rs2))
+    if ((int32_t)core.regs.read(ins.B.rs1) >= (int32_t)core.regs.read(ins.B.rs2))
     {
-        regs.pc += rv32_sext(offset, 13);
-        used_cycle  = 1;
+        core.regs.pc += rv32_sext(offset, 13);
+        used_cycle    = 1;
     }
     else
     {
-        used_cycle  = 2;
+        core.regs.pc += 4;
+        used_cycle    = 2;
     }
 }
 
@@ -244,13 +245,14 @@ idec(bltu)
     offset <<= 4;
     offset |= ins.B.imm_4_1;
     offset <<= 1;
-    if (regs.read(ins.B.rs1) < regs.read(ins.B.rs2))
+    if (core.regs.read(ins.B.rs1) < core.regs.read(ins.B.rs2))
     {
-        regs.pc += rv32_sext(offset, 13);
+        core.regs.pc += rv32_sext(offset, 13);
         used_cycle  = 1;
     }
     else
     {
+        core.regs.pc += 4;
         used_cycle  = 2;
     }
 }
@@ -266,14 +268,14 @@ idec(bgeu)
     offset <<= 4;
     offset |= ins.B.imm_4_1;
     offset <<= 1;
-    if (regs.read(ins.B.rs1) >= regs.read(ins.B.rs2))
+    if (core.regs.read(ins.B.rs1) >= core.regs.read(ins.B.rs2))
     {
-        regs.pc += rv32_sext(offset, 13);
+        core.regs.pc += rv32_sext(offset, 13);
         used_cycle  = 1;
     }
     else
     {
-        regs.pc += 4;
+        core.regs.pc += 4;
         used_cycle  = 2;
     }
 }
@@ -281,51 +283,51 @@ idec(bgeu)
 idec(lb)
 {
     uint32_t cycle = 0;
-    uint32_t addr = regs.read(ins.I.rs1) + rv32_sext(ins.I.offset, 12);
-    uint8_t data = periphs.rd_u8(addr, cycle);
-    regs.write(ins.I.rd, rv32_sext(data, 8));
+    uint32_t addr = core.regs.read(ins.I.rs1) + rv32_sext(ins.I.offset, 12);
+    uint8_t data = core.periphs.rd_u8(addr, cycle);
+    core.regs.write(ins.I.rd, rv32_sext(data, 8));
     used_cycle  = cycle + 1;
-    regs.pc += 4;
+    core.regs.pc += 4;
 }
 
 idec(lh)
 {
     uint32_t cycle = 0;
-    uint32_t addr = regs.read(ins.I.rs1) + rv32_sext(ins.I.offset, 12);
-    uint16_t data = periphs.rd_u16(addr, cycle);
-    regs.write(ins.I.rd, rv32_sext(data, 16));
+    uint32_t addr = core.regs.read(ins.I.rs1) + rv32_sext(ins.I.offset, 12);
+    uint16_t data = core.periphs.rd_u16(addr, cycle);
+    core.regs.write(ins.I.rd, rv32_sext(data, 16));
     used_cycle  = cycle + 1;
-    regs.pc += 4;
+    core.regs.pc += 4;
 }
 
 idec(lw)
 {
     uint32_t cycle = 0;
-    uint32_t addr = regs.read(ins.I.rs1) + rv32_sext(ins.I.offset, 12);
-    uint32_t data = periphs.rd_u32(addr, cycle);
-    regs.write(ins.I.rd, data);
+    uint32_t addr = core.regs.read(ins.I.rs1) + rv32_sext(ins.I.offset, 12);
+    uint32_t data = core.periphs.rd_u32(addr, cycle);
+    core.regs.write(ins.I.rd, data);
     used_cycle  = cycle + 1;
-    regs.pc += 4;
+    core.regs.pc += 4;
 }
 
 idec(lbu)
 {
     uint32_t cycle = 0;
-    uint32_t addr = regs.read(ins.I.rs1) + rv32_sext(ins.I.offset, 12);
-    uint8_t data = periphs.rd_u8(addr, cycle);
-    regs.write(ins.I.rd, data);
+    uint32_t addr = core.regs.read(ins.I.rs1) + rv32_sext(ins.I.offset, 12);
+    uint8_t data = core.periphs.rd_u8(addr, cycle);
+    core.regs.write(ins.I.rd, data);
     used_cycle  = cycle + 1;
-    regs.pc += 4;
+    core.regs.pc += 4;
 }
 
 idec(lhu)
 {
     uint32_t cycle = 0;
-    uint32_t addr = regs.read(ins.I.rs1) + rv32_sext(ins.I.offset, 12);
-    uint16_t data = periphs.rd_u16(addr, cycle);
-    regs.write(ins.I.rd, data);
+    uint32_t addr = core.regs.read(ins.I.rs1) + rv32_sext(ins.I.offset, 12);
+    uint16_t data = core.periphs.rd_u16(addr, cycle);
+    core.regs.write(ins.I.rd, data);
     used_cycle  = cycle + 1;
-    regs.pc += 4;
+    core.regs.pc += 4;
 }
 
 idec(sb)
@@ -335,10 +337,10 @@ idec(sb)
     offset = ins.S.offset_11_5;
     offset <<= 5;
     offset |= ins.S.offset_4_0;
-    uint32_t addr = regs.read(ins.S.rs1) + rv32_sext(offset, 12);
-    periphs.wr_u8(addr, regs.read(ins.S.rs2), cycle);
+    uint32_t addr = core.regs.read(ins.S.rs1) + rv32_sext(offset, 12);
+    core.periphs.wr_u8(addr, core.regs.read(ins.S.rs2), cycle);
     used_cycle  = cycle + 1;
-    regs.pc += 4;
+    core.regs.pc += 4;
 }
 
 idec(sh)
@@ -348,10 +350,10 @@ idec(sh)
     offset = ins.S.offset_11_5;
     offset <<= 5;
     offset |= ins.S.offset_4_0;
-    uint32_t addr = regs.read(ins.S.rs1) + rv32_sext(offset, 12);
-    periphs.wr_u16(addr, regs.read(ins.S.rs2), cycle);
+    uint32_t addr = core.regs.read(ins.S.rs1) + rv32_sext(offset, 12);
+    core.periphs.wr_u16(addr, core.regs.read(ins.S.rs2), cycle);
     used_cycle  = cycle + 1;
-    regs.pc += 4;
+    core.regs.pc += 4;
 }
 
 idec(sw)
@@ -361,171 +363,171 @@ idec(sw)
     offset = ins.S.offset_11_5;
     offset <<= 5;
     offset |= ins.S.offset_4_0;
-    uint32_t addr = regs.read(ins.S.rs1) + rv32_sext(offset, 12);
-    periphs.wr_u32(addr, regs.read(ins.S.rs2), cycle);
+    uint32_t addr = core.regs.read(ins.S.rs1) + rv32_sext(offset, 12);
+    core.periphs.wr_u32(addr, core.regs.read(ins.S.rs2), cycle);
     used_cycle  = cycle + 1;
-    regs.pc += 4;
+    core.regs.pc += 4;
 }
 
 idec(addi)
 {
-    regs.write(ins.I.rd, regs.read(ins.I.rs1) + rv32_sext(ins.I.imm, 12));
-    regs.pc += 4;
+    core.regs.write(ins.I.rd, core.regs.read(ins.I.rs1) + rv32_sext(ins.I.imm, 12));
+    core.regs.pc += 4;
     used_cycle  = 1;
 }
 
 idec(slti)
 {
-    if (regs.read(ins.I.rs1) < rv32_sext(ins.I.imm, 12))
+    if (core.regs.read(ins.I.rs1) < rv32_sext(ins.I.imm, 12))
     {
-        regs.write(ins.I.rd, 1);
+        core.regs.write(ins.I.rd, 1);
     }
     else
     {
-        regs.write(ins.I.rd, 0);
+        core.regs.write(ins.I.rd, 0);
     }
-    regs.pc += 4;
+    core.regs.pc += 4;
     used_cycle  = 1;
 }
 
 idec(sltiu)
 {
-    if (regs.read(ins.I.rs1) < (uint32_t)rv32_sext(ins.I.imm, 12))
+    if (core.regs.read(ins.I.rs1) < (uint32_t)rv32_sext(ins.I.imm, 12))
     {
-        regs.write(ins.I.rd, 1);
+        core.regs.write(ins.I.rd, 1);
     }
     else
     {
-        regs.write(ins.I.rd, 0);
+        core.regs.write(ins.I.rd, 0);
     }
-    regs.pc += 4;
+    core.regs.pc += 4;
     used_cycle  = 1;
 }
 
 idec(xori)
 {
-    regs.write(ins.I.rd, regs.read(ins.I.rs1) ^ rv32_sext(ins.I.imm, 12));
-    regs.pc += 4;
+    core.regs.write(ins.I.rd, core.regs.read(ins.I.rs1) ^ rv32_sext(ins.I.imm, 12));
+    core.regs.pc += 4;
     used_cycle  = 1;
 }
 
 idec(ori)
 {
-    regs.write(ins.I.rd, regs.read(ins.I.rs1) | rv32_sext(ins.I.imm, 12));
-    regs.pc += 4;
+    core.regs.write(ins.I.rd, core.regs.read(ins.I.rs1) | rv32_sext(ins.I.imm, 12));
+    core.regs.pc += 4;
     used_cycle  = 1;
 }
 
 idec(andi)
 {
-    regs.write(ins.I.rd, regs.read(ins.I.rs1) & rv32_sext(ins.I.imm, 12));
-    regs.pc += 4;
+    core.regs.write(ins.I.rd, core.regs.read(ins.I.rs1) & rv32_sext(ins.I.imm, 12));
+    core.regs.pc += 4;
     used_cycle  = 1;
 }
 
 idec(slli)
 {
-    regs.write(ins.I.rd, regs.read(ins.I.rs1) << ins.I.shamt);
-    regs.pc += 4;
+    core.regs.write(ins.I.rd, core.regs.read(ins.I.rs1) << ins.I.shamt);
+    core.regs.pc += 4;
     used_cycle  = 1;
 }
 
 idec(srli)
 {
-    regs.write(ins.I.rd, regs.read(ins.I.rs1) >> ins.I.shamt);
-    regs.pc += 4;
+    core.regs.write(ins.I.rd, core.regs.read(ins.I.rs1) >> ins.I.shamt);
+    core.regs.pc += 4;
     used_cycle  = 1;
 }
 
 idec(srai)
 {
     if (ins.I.shamt & 0x20 == 0) return;
-    regs.write(ins.I.rd, (int32_t)regs.read(ins.I.rs1) >> ins.I.shamt);
-    regs.pc += 4;
+    core.regs.write(ins.I.rd, (int32_t)core.regs.read(ins.I.rs1) >> ins.I.shamt);
+    core.regs.pc += 4;
     used_cycle  = 1;
 }
 
 idec(add)
 {
-    regs.write(ins.R.rd, regs.read(ins.R.rs1) + regs.read(ins.R.rs2));
-    regs.pc += 4;
+    core.regs.write(ins.R.rd, core.regs.read(ins.R.rs1) + core.regs.read(ins.R.rs2));
+    core.regs.pc += 4;
     used_cycle  = 1;
 }
 
 idec(sub)
 {
-    regs.write(ins.R.rd, regs.read(ins.R.rs1) - regs.read(ins.R.rs2));
-    regs.pc += 4;
+    core.regs.write(ins.R.rd, core.regs.read(ins.R.rs1) - core.regs.read(ins.R.rs2));
+    core.regs.pc += 4;
     used_cycle  = 1;
 }
 
 idec(sll)
 {
-    regs.write(ins.R.rd, regs.read(ins.R.rs1) << (regs.read(ins.R.rs2) & 0x1f));
-    regs.pc += 4;
+    core.regs.write(ins.R.rd, core.regs.read(ins.R.rs1) << (core.regs.read(ins.R.rs2) & 0x1f));
+    core.regs.pc += 4;
     used_cycle  = 1;
 }
 
 idec(slt)
 {
-    if (regs.read(ins.R.rs1) < (int32_t)regs.read(ins.R.rs2))
+    if (core.regs.read(ins.R.rs1) < (int32_t)core.regs.read(ins.R.rs2))
     {
-        regs.write(ins.R.rd, 1);
+        core.regs.write(ins.R.rd, 1);
     }
     else
     {
-        regs.write(ins.R.rd, 0);
+        core.regs.write(ins.R.rd, 0);
     }
-    regs.pc += 4;
+    core.regs.pc += 4;
     used_cycle  = 1;
 }
 
 idec(sltu)
 {
-    if (regs.read(ins.R.rs1) < regs.read(ins.R.rs2))
+    if (core.regs.read(ins.R.rs1) < core.regs.read(ins.R.rs2))
     {
-        regs.write(ins.R.rd, 1);
+        core.regs.write(ins.R.rd, 1);
     }
     else
     {
-        regs.write(ins.R.rd, 0);
+        core.regs.write(ins.R.rd, 0);
     }
-    regs.pc += 4;
+    core.regs.pc += 4;
     used_cycle  = 1;
 }
 
 idec(xor)
 {
-    regs.write(ins.R.rd, regs.read(ins.R.rs1) ^ regs.read(ins.R.rs2));
-    regs.pc += 4;
+    core.regs.write(ins.R.rd, core.regs.read(ins.R.rs1) ^ core.regs.read(ins.R.rs2));
+    core.regs.pc += 4;
     used_cycle  = 1;
 }
 
 idec(srl)
 {
-    regs.write(ins.R.rd, regs.read(ins.R.rs1) >> (regs.read(ins.R.rs2) & 0x1f));
-    regs.pc += 4;
+    core.regs.write(ins.R.rd, core.regs.read(ins.R.rs1) >> (core.regs.read(ins.R.rs2) & 0x1f));
+    core.regs.pc += 4;
     used_cycle  = 1;
 }
 
 idec(sra)
 {
-    regs.write(ins.R.rd, (int32_t)regs.read(ins.R.rs1) >> (regs.read(ins.R.rs2) & 0x1f));
-    regs.pc += 4;
+    core.regs.write(ins.R.rd, (int32_t)core.regs.read(ins.R.rs1) >> (core.regs.read(ins.R.rs2) & 0x1f));
+    core.regs.pc += 4;
     used_cycle  = 1;
 }
 
 idec(or)
 {
-    regs.write(ins.R.rd, regs.read(ins.R.rs1) | regs.read(ins.R.rs2));
-    regs.pc += 4;
+    core.regs.write(ins.R.rd, core.regs.read(ins.R.rs1) | core.regs.read(ins.R.rs2));
+    core.regs.pc += 4;
     used_cycle  = 1;
 }
 
 idec(and)
 {
-    regs.write(ins.R.rd, regs.read(ins.R.rs1) & regs.read(ins.R.rs2));
-    regs.pc += 4;
+    core.regs.write(ins.R.rd, core.regs.read(ins.R.rs1) & core.regs.read(ins.R.rs2));
+    core.regs.pc += 4;
     used_cycle  = 1;
 }
 
@@ -545,24 +547,31 @@ idec(ecall)
 }
 
 idec(ebreak)
-{}
+{
+}
 
 idec(csrrw)
-{}
+{
+}
 
 idec(csrrs)
-{}
+{
+}
 
 idec(csrrc)
-{}
+{
+}
 
 idec(csrrwi)
-{}
+{
+}
 
 idec(csrrsi)
-{}
+{
+}
 
 idec(csrrci)
-{}
+{
+}
 
 #undef idec
