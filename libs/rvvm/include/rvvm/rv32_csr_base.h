@@ -20,14 +20,36 @@ class rv32_csr_base:public rv32_csr_impl
 
     private:
         std::map<uint16_t, uint32_t &> m_collect;
-        union{}m_mvendorid;
-        union{}m_marchid;
-        union{}m_mimpid;
-        union{}m_mhartid;
-        union{}m_configptr;
         union{
             uint32_t value;
-            struct{
+            struct
+            {
+                uint32_t offset:7;
+                uint32_t bank:25;
+            };
+        }m_mvendorid; //could be zero
+
+        union{
+            uint32_t value;
+        }m_marchid; //could be zero
+
+        union{
+            uint32_t value;
+        }m_mimpid;  //could be zero
+
+        union{
+            uint32_t value;
+        }m_mhartid; //could be zero
+
+        union{
+            uint32_t value;
+        }m_configptr; //could be zero
+
+        union
+        {
+            uint32_t value;
+            struct
+            {
                 uint32_t UIE:1;
                 uint32_t SIE:1;
                 uint32_t :1;
@@ -51,16 +73,64 @@ class rv32_csr_base:public rv32_csr_impl
                 uint32_t SD:1;
             };
         }m_mstatus;
-        union{}m_misa;
-        union{}m_medeleg;
-        union{}m_mideleg;
+
+        union{
+            uint32_t value;
+            struct
+            {
+                uint32_t extensions:26;
+                uint32_t :4;
+                uint32_t mxl:2;
+            };
+        }m_misa; // could be zero
+
+        union
+        {
+            uint32_t value;
+        }m_medeleg; // only need in S-mode
+
+        union
+        {
+            uint32_t value;
+        }m_mideleg; // same with medeleg
+
         union{}m_mie;
-        union{}m_mtvec;
-        union{}m_mcounteren;
-        union{}m_mscratch;
-        union{}m_mepc;
-        union{}m_mcause;
-        union{}m_mtval;
+
+        union{
+            uint32_t value;
+            struct
+            {
+                uint32_t mode:2;
+                uint32_t base_31_2:30;
+            };
+        }m_mtvec;
+
+        union{
+            uint32_t value;
+        }m_mcounteren; // only need in U-mode
+
+        union{
+            uint32_t value;
+        }m_mscratch;
+
+        union
+        {
+            uint32_t value;
+        }m_mepc;
+
+        union{
+            uint32_t value;
+            struct
+            {
+                uint32_t code:31;
+                uint32_t interrupt:1;
+            };
+        }m_mcause;
+
+        union
+        {
+            uint32_t value;
+        }m_mtval;
         union{}m_mip;
         union{}m_mtinst;
         union{}m_tval2;
