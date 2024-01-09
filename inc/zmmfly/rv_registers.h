@@ -1,15 +1,17 @@
 #ifndef __ZMMFLY_RV_REGISTERS_H__
 #define __ZMMFLY_RV_REGISTERS_H__
 
-#include <cstdint>
+#include "zmmfly/rv_defs.h"
 
 namespace zmmfly::rv
 {
 
 #pragma pack(push, 1)
-template<typename T = uint32_t>
-using registers = struct registers
+template<typename T>
+struct registers
 {
+    static_assert(std::is_same<T, uint32_t>::value || std::is_same<T, uint64_t>::value,
+                  "Template parameter T must be uint32_t or uint64_t");
     union {
         struct{
             T x[33];

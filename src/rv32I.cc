@@ -6,6 +6,11 @@ namespace zmmfly::rv32
 I::I()
 {}
 
+std::string I::name()
+{
+    return "I";
+}
+
 rv_err_t I::execute_normal(uint32_t inst, registers_t& regs, bus_t& bus)
 {
     rv_err_t res = RV_EUNSUPPORTED;

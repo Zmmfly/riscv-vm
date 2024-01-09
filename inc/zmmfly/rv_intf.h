@@ -3,7 +3,6 @@
 
 #include "zmmfly/rv_defs.h"
 #include "zmmfly/rv_registers.h"
-#include <algorithm>
 
 namespace zmmfly::rv
 {
@@ -39,9 +38,16 @@ template<typename T = uint32_t>
 class inst_intf
 {
 public:
-    using registers_t = typename registers<T>;
+    using registers_t = typename struct registers<T>;
     using bus_intf_t  = typename bus_intf<T>;
     virtual ~inst_intf() {};
+
+    /**
+     * @brief Get instruction name, like I / M / A / F / D / C
+     * 
+     * @return std::string 
+     */
+    virtual std::string name() = 0;
 
     /**
      * @brief Instructions registed notify
@@ -59,7 +65,7 @@ public:
      * @param regs registers refer
      * @return rv_err_t 
      */
-    virtual rv_err_t execute_normal(T inst, base_registers& regs, bus_mgr<T>& bus)       { return RV_EUNSUPPORTED; };
+    virtual rv_err_t execute_normal(T inst, registers_t& regs, bus_mgr<T>& bus)       { return RV_EUNSUPPORTED; };
 
     /**
      * @brief Compression instruction executor
@@ -68,7 +74,7 @@ public:
      * @param regs registers refer
      * @return rv_err_t 
      */
-    virtual rv_err_t execute_compr(uint16_t inst, base_registers& regs, bus_mgr<T>& bus) { return RV_EUNSUPPORTED; };
+    virtual rv_err_t execute_compr(uint16_t inst, registers_t& regs, bus_mgr<T>& bus) { return RV_EUNSUPPORTED; };
 };
 
 template<typename T>
