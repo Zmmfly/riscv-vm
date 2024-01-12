@@ -33,6 +33,7 @@ rv_err_t I::execute_normal(uint32_t inst, registers_t& regs, bus_t& bus)
         }
         case 0b00'011'11:   /* MISC-MEM */ {
             if (inst_ref.fence.func3 == 0b000) return RV_EOK;
+            /* FENCE */
         }
         case 0b00'100'11:   /* OP-IMM */ {
             switch (inst_ref.I.func3) {
