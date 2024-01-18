@@ -5,7 +5,7 @@ License: GPL-V3
 
 # Target
 - [ ] RV32G
-  - [ ] I
+  - [x] I
   - [ ] M
   - [ ] A
   - [ ] F
