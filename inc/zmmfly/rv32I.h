@@ -4,7 +4,7 @@
 #include "zmmfly/rv32_base.h"
 #include <functional>
 
-namespace zmmfly::rv32
+namespace zmmfly::rv32::v1
 {
 
 class I
@@ -16,26 +16,12 @@ public:
 
     std::string name();
 
-    rv_err_t execute_normal(uint32_t inst, registers_t& regs, bus_t& bus);
+    rv_err_t set(std::string k, std::any v);
 
-    /**
-     * @brief Set the ecall callback
-     * @note if used, must set before running
-     * 
-     * @param fn 
-     */
-    void set_ecall(std::function<void(void)> fn);
-
-    /**
-     * @brief Set the ebreak callback
-     * @note if used, must set before running
-     * 
-     * @param fn 
-     */
-    void set_ebreak(std::function<void(void)> fn);
+    rv_err_t execute_normal(uint32_t inst, registers_t& regs, bus_t& bus, inst_map_t& inst_map);
 
 private:
-    std::function<void(void)> m_ecall, m_ebreak;
+    std::function<void(void)> m_ecall, m_ebreak, m_fence;
 };
 
 };

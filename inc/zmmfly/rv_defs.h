@@ -6,6 +6,8 @@
 #include <string>
 #include <type_traits>
 #include <algorithm>
+#include <any>
+#include <map>
 
 namespace zmmfly
 {
@@ -16,6 +18,7 @@ using rv_err_t = enum rv_err_t
     RV_EUNALIGNED   = 1,
     RV_EUNSUPPORTED = 2,
     RV_EOVERLAP     = 3,
+    RV_ETYPE        = 4,
 };
 
 };

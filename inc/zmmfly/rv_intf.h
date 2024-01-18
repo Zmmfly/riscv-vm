@@ -26,12 +26,37 @@ public:
 template<typename T>
 class bus_mgr{
 public:
-    virtual ~bus() {};
+    virtual ~bus_mgr() {};
 
+    /**
+     * @brief Mount memory to bus
+     * 
+     * @param addr 
+     * @param size 
+     * @param intf 
+     * @return rv_err_t 
+     */
     virtual rv_err_t mount(T addr, size_t size, std::shared_ptr<bus_intf<T>> intf) = 0;
 
-    virtual rv_err_t read(T offset, void* ptr, size_t len)  = 0;
-    virtual rv_err_t write(T offset, void* ptr, size_t len) = 0;
+    /**
+     * @brief Read memory from bus
+     * 
+     * @param addr 
+     * @param ptr 
+     * @param len 
+     * @return rv_err_t 
+     */
+    virtual rv_err_t read(T addr, void* ptr, size_t len)  = 0;
+
+    /**
+     * @brief Write memory to bus
+     * 
+     * @param addr 
+     * @param ptr 
+     * @param len 
+     * @return rv_err_t 
+     */
+    virtual rv_err_t write(T addr, void* ptr, size_t len) = 0;
 };
 
 template<typename T = uint32_t>
@@ -40,6 +65,8 @@ class inst_intf
 public:
     using registers_t = typename struct registers<T>;
     using bus_intf_t  = typename bus_intf<T>;
+    using inst_map_t  = typename std::map< std::shared_ptr< inst_intf<T> > >;
+
     virtual ~inst_intf() {};
 
     /**
@@ -59,22 +86,49 @@ public:
     virtual rv_err_t insts_notify(std::string insts)                    { return RV_EUNSUPPORTED; };
 
     /**
+     * @brief Set any value
+     * 
+     * @param k 
+     * @param v 
+     * @return rv_err_t 
+     */
+    virtual rv_err_t set(std::string k, std::any v)                     { return RV_EUNSUPPORTED; };
+
+    /**
+     * @brief Get any value
+     * 
+     * @param k 
+     * @param v use pointer as std::any to get value
+     * @return rv_err_t 
+     */
+    virtual rv_err_t get(std::string k, std::any v)                     { return RV_EUNSUPPORTED; };
+
+    /**
      * @brief Normal instruction executor
      * 
      * @param inst instruction
      * @param regs registers refer
+     * @param dbus data bus
+     * @param inst_map
      * @return rv_err_t 
      */
-    virtual rv_err_t execute_normal(T inst, registers_t& regs, bus_mgr<T>& bus)       { return RV_EUNSUPPORTED; };
+    virtual rv_err_t execute_normal(T inst, registers_t& regs, bus_mgr<T>& dbus, inst_map_t& inst_map)
+    { 
+        return RV_EUNSUPPORTED; 
+    };
 
     /**
      * @brief Compression instruction executor
      * 
      * @param inst instruction
      * @param regs registers refer
+     * @param inst_map
      * @return rv_err_t 
      */
-    virtual rv_err_t execute_compr(uint16_t inst, registers_t& regs, bus_mgr<T>& bus) { return RV_EUNSUPPORTED; };
+    virtual rv_err_t execute_compr(uint16_t inst, registers_t& regs, bus_mgr<T>& bus, inst_map_t& inst_map)
+    {
+        return RV_EUNSUPPORTED;
+    };
 };
 
 template<typename T>

@@ -3,7 +3,7 @@
 
 #include "zmmfly/rv32_base.h"
 
-namespace zmmfly::rv32
+namespace zmmfly::rv32::v1
 {
 
 class F

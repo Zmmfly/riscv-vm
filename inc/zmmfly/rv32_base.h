@@ -51,12 +51,12 @@ using inst_type = union inst_type
     }I;
 
     struct {
-        uint32_t opcode: 7;
-        uint32_t imm1  : 5;     /* imm[4:0] */
-        uint32_t func3 : 3;
-        uint32_t rs1   : 5;
-        uint32_t rs2   : 5;
-        uint32_t imm2  : 7;     /* imm[11:5] */
+        uint32_t opcode : 7;
+        uint32_t imm4_0 : 5;  /* imm[4:0] */
+        uint32_t func3  : 3;
+        uint32_t rs1    : 5;
+        uint32_t rs2    : 5;
+        uint32_t imm11_5: 7;  /* imm[11:5] */
     }S;
 
     struct {
@@ -71,9 +71,9 @@ using inst_type = union inst_type
     }B;
 
     struct {
-        uint32_t opcode: 7;
-        uint32_t rd    : 5;
-        uint32_t imm   : 20;    /* imm[31:12] */
+        uint32_t opcode  : 7;
+        uint32_t rd      : 5;
+        uint32_t imm31_12: 20;  /* imm[31:12] */
     }U;
 
     struct {
@@ -82,9 +82,32 @@ using inst_type = union inst_type
         uint32_t imm19_12: 8;   /* imm[19:12] */
         uint32_t immb11  : 1;   /* imm[11] */
         uint32_t imm10_1 : 10;  /* imm[10:1] */
-        uint32_t immb12  : 1;   /* imm[12] */
+        uint32_t immb20  : 1;   /* imm[20] */
     }J;
 };
+
+typedef union instB_imm{
+    uint32_t imm;
+    struct{
+        uint32_t :1;
+        uint32_t imm4_1:4;
+        uint32_t imm10_5:6;
+        uint32_t imm12:1;
+        uint32_t :20;
+    };
+}instB_imm;
+
+typedef union instJ_imm{
+    uint32_t imm;
+    struct {
+        uint32_t :1;
+        uint32_t imm10_1:10;
+        uint32_t imm11:1;
+        uint32_t imm19_12:8;
+        uint32_t imm20:1;
+        uint32_t :11;
+    };
+}instJ_imm;
 
 using bus_t       = zmmfly::rv::bus_mgr<uint32_t>;
 using bus_intf_t  = zmmfly::rv::bus_intf<uint32_t>;
