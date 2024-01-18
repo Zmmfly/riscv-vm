@@ -12,7 +12,7 @@ class I
 {
 
 public:
-    I() {};
+    I();
 
     std::string name();
 

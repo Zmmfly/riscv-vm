@@ -63,9 +63,9 @@ template<typename T = uint32_t>
 class inst_intf
 {
 public:
-    using registers_t = typename struct registers<T>;
-    using bus_intf_t  = typename bus_intf<T>;
-    using inst_map_t  = typename std::map< std::shared_ptr< inst_intf<T> > >;
+    using registers_t = registers<T>;
+    using bus_intf_t  = bus_intf<T>;
+    using inst_map_t  = std::map<std::string, std::shared_ptr<inst_intf<T>>>;
 
     virtual ~inst_intf() {};
 
