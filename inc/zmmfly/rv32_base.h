@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include "zmmfly/rv_intf.h"
+#include "zmmfly/rv_busmgr.hpp"
 
 namespace zmmfly::rv32
 {
@@ -109,7 +110,7 @@ typedef union instJ_imm{
     };
 }instJ_imm;
 
-using bus_t       = zmmfly::rv::bus_mgr<uint32_t>;
+using bus_t       = zmmfly::rv::bus_mgr_intf<uint32_t>;
 using bus_intf_t  = zmmfly::rv::bus_intf<uint32_t>;
 using inst_intf_t = zmmfly::rv::inst_intf<uint32_t>;
 #pragma pack(pop)

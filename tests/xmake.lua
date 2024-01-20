@@ -6,7 +6,9 @@ for _, file in ipairs(os.files("src/rv32/test_*.cc")) do
         set_default(false)
         set_languages("c++20")
         add_deps("rvvm")
+        add_files("src/tester_rv32i.cc")
         add_files("src/rv32/" .. name .. ".cc")
+        add_includedirs("inc")
         add_tests("default")
         add_packages("gtest")
 end
