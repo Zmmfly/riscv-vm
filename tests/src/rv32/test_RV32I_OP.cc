@@ -264,12 +264,12 @@ TEST(OP, SUB)
     inst.R.rs1   = 1;
     inst.R.rs2   = 2;
 
-    regs.x[inst.R.rs1] = 1;
+    regs.x[inst.R.rs1] = 2;
     regs.x[inst.R.rs2] = 1;
 
     auto res1 = test.exec(inst.u32);
     EXPECT_EQ(RV_EOK, res1);
-    EXPECT_EQ(0, regs.x[inst.R.rd]);
+    EXPECT_EQ(1, regs.x[inst.R.rd]);
 }
 
 TEST(OP, ADD)
