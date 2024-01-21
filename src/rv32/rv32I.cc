@@ -106,6 +106,7 @@ rv_err_t I::execute_normal(uint32_t inst, registers_t& regs, bus_t& bus, inst_ma
                 }
                 default: break;
             }
+            break;
         }
         case 0b00'101'11: { /* U AUIPC */
             // x[rd] = pc + sext(imm << 12) imm为移位前的值
@@ -137,6 +138,7 @@ rv_err_t I::execute_normal(uint32_t inst, registers_t& regs, bus_t& bus, inst_ma
                     break;
                 }
             }
+            break;
         }
         case 0b01'100'11: { /* OP */ 
             switch(iref.R.func3) {
@@ -210,6 +212,7 @@ rv_err_t I::execute_normal(uint32_t inst, registers_t& regs, bus_t& bus, inst_ma
                 }
                 default: break;
             }
+            break;
         }
         case 0b01'101'11: { /* U LUI */
             // x[rd] = sext( (uint32_t)imm_31_12 << 12 )
@@ -298,6 +301,7 @@ rv_err_t I::execute_normal(uint32_t inst, registers_t& regs, bus_t& bus, inst_ma
                 }
                 default: break;
             }
+            break;
         }
         case 0b11'001'11: { /* I JALR */
             if (iref.I.func3 != 0b000) break;
@@ -332,6 +336,7 @@ rv_err_t I::execute_normal(uint32_t inst, registers_t& regs, bus_t& bus, inst_ma
         }
         default: break;
     }
+    regs.x[0] = 0;
     return res;
 }
 
