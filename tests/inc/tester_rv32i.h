@@ -34,8 +34,8 @@ public:
     ~tester_rv32i();
 
     void reset();
-    rv_err_t execute_inst(uint32_t inst);
-private:
+    rv_err_t exec(uint32_t inst);
+
     std::shared_ptr<mem> m_mem;
 };
 

@@ -33,6 +33,8 @@ rv_err_t mem::write(uint32_t offset, void* ptr, size_t len)
 tester_rv32i::tester_rv32i()
 {
     instmap["I"] = std::make_shared<rv32::v1::I>();
+    m_mem        = std::make_shared<mem>();
+    busmgr.mount(0x10000000, 4*1024, m_mem);
 }
 
 tester_rv32i::~tester_rv32i()
@@ -43,7 +45,7 @@ void tester_rv32i::reset()
     memset(&regs, 0, sizeof(regs));
 }
 
-rv_err_t tester_rv32i::execute_inst(uint32_t inst)
+rv_err_t tester_rv32i::exec(uint32_t inst)
 {
     return instmap["I"]->execute_normal(inst, regs, busmgr, instmap);
 }
