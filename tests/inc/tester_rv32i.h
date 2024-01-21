@@ -13,13 +13,12 @@ class mem
 :public rv32::bus_intf_t
 {
 public:
+    std::vector<uint8_t> m_mem;
     mem(size_t mem_size = 4 * 1024);
 
+    void reset();
     rv_err_t read(uint32_t offset, void* ptr, size_t len);
     rv_err_t write(uint32_t offset, void* ptr, size_t len);
-
-private:
-    std::vector<uint8_t> m_mem;
 };
 
 class tester_rv32i
@@ -35,7 +34,7 @@ public:
     ~tester_rv32i();
 
     void reset();
-    void execute_inst(uint32_t inst);
+    rv_err_t execute_inst(uint32_t inst);
 private:
     std::shared_ptr<mem> m_mem;
 };

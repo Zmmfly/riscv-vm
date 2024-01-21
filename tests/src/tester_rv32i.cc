@@ -5,6 +5,11 @@ mem::mem(size_t mem_size)
     m_mem.resize(mem_size);
 }
 
+void mem::reset()
+{
+    memset(m_mem.data(), 0, m_mem.size());
+}
+
 rv_err_t mem::read(uint32_t offset, void* ptr, size_t len)
 {
     if (offset >= m_mem.size() || offset + len >= m_mem.size())
@@ -34,7 +39,11 @@ tester_rv32i::~tester_rv32i()
 {}
 
 void tester_rv32i::reset()
-{}
+{
+    memset(&regs, 0, sizeof(regs));
+}
 
-void tester_rv32i::execute_inst(uint32_t inst)
-{}
+rv_err_t tester_rv32i::execute_inst(uint32_t inst)
+{
+    return instmap["I"]->execute_normal(inst, regs, busmgr, instmap);
+}
