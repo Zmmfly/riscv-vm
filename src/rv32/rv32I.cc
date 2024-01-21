@@ -324,6 +324,8 @@ rv_err_t I::execute_normal(uint32_t inst, registers_t& regs, bus_t& bus, inst_ma
 
             regs.x[iref.J.rd] = regs.pc + 4;
             regs.pc += rv::sext<int32_t>(v.imm, 21);
+            res = RV_EOK;
+            break;
         }
         case 0b11'100'11: { /* SYSTEM */
             if (iref.I.func3 != 0b000) break;

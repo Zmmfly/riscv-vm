@@ -10,7 +10,7 @@ zmmfly::rv32::inst_type inst;
 
 int main(int argc, char** argv)
 {
-    inst.opcode = 0b0110011;
+    inst.opcode = 0b1101111;
     inst.others = 0;
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
@@ -57,6 +57,7 @@ TEST(JAL, JAL)
     inst.J.rd       = 1;
     inst.J.immb20   = imm.imm20;
     inst.J.imm19_12 = imm.imm19_12;
+    inst.J.immb11   = imm.imm11;
     inst.J.imm10_1  = imm.imm10_1;
     regs.pc         = 8;
 
