@@ -145,11 +145,11 @@ rv_err_t I::execute_normal(uint32_t inst, registers_t& regs, bus_t& bus, inst_ma
                 case 0b000: { /* R ADD and SUB */
                     if (iref.R.func7 == 0b000'0000) {           /* R ADD */
                         // x[rd] = x[rs1] + x[rs2]
-                        regs.x[iref.R.rs1] = regs.x[iref.R.rs1] + regs.x[iref.R.rs2];
+                        regs.x[iref.R.rd] = regs.x[iref.R.rs1] + regs.x[iref.R.rs2];
                         res = RV_EOK;
                     } else if (iref.R.func7 == 0b010'0000) {    /* R SUB */
                         // x[rd] = x[rs1] - x[rs2]
-                        regs.x[iref.R.rs1] = regs.x[iref.R.rs1] - regs.x[iref.R.rs2];
+                        regs.x[iref.R.rd] = regs.x[iref.R.rs1] - regs.x[iref.R.rs2];
                         res = RV_EOK;
                     }
                     break;
