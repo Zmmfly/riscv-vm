@@ -14,7 +14,7 @@ public:
     using bus_intf_ptr_t    = std::shared_ptr<bus_intf<T>>;
     using mem_item_t        = std::tuple<T, size_t, bus_intf_ptr_t>;
     using mem_target_item_t = std::tuple<bus_intf_ptr_t, T, size_t>;   /* buf interface, offset, size */
-    using mem_targets_t     = std::vector<mem_ops_t>;
+    using mem_targets_t     = std::vector<mem_target_item_t>;
     busmgr(bool is_ibus = false)
     {
         m_is_ibus = is_ibus;
@@ -159,7 +159,7 @@ private:
     {
         T start = addr;
         T end = addr + size;
-        for (auto &it:m_mtx_mems)
+        for (auto &it:m_mems)
         {
             T mem_addr;
             size_t mem_size;

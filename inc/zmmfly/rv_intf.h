@@ -26,7 +26,7 @@ public:
 template<typename T>
 class bus_mgr_intf{
 public:
-    virtual ~bus_mgr() {};
+    virtual ~bus_mgr_intf() {};
 
     /**
      * @brief Mount memory to bus
