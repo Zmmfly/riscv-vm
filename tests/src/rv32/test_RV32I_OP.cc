@@ -130,12 +130,12 @@ TEST(OP, SRL)
     inst.R.rs1   = 1;
     inst.R.rs1   = 2;
 
-    regs.x[inst.R.rs1] = 0x00000080;
+    regs.x[inst.R.rs1] = 0x00000028;
     regs.x[inst.R.rs2] = 3;
 
     auto res1 = test.exec(inst.u32);
     EXPECT_EQ(RV_EOK, res1);
-    EXPECT_EQ(1, regs.x[inst.R.rd]);
+    EXPECT_EQ(5, regs.x[inst.R.rd]);
 }
 
 TEST(OP, XOR)
