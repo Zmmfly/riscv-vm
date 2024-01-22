@@ -231,6 +231,7 @@ rv_err_t I::execute_normal(uint32_t inst, registers_t& regs, bus_t& bus, inst_ma
                     /* assign imm */
                     v.imm4_1  = iref.B.imm4_1;
                     v.imm10_5 = iref.B.imm10_5;
+                    v.imm11   = iref.B.immb11;
                     v.imm12   = iref.B.immb12;
 
                     if (regs.x[iref.B.rs1] == regs.x[iref.B.rs2]) regs.pc += rv::sext<int32_t>(v.imm, 13);
@@ -244,6 +245,7 @@ rv_err_t I::execute_normal(uint32_t inst, registers_t& regs, bus_t& bus, inst_ma
                     /* assign imm */
                     v.imm4_1  = iref.B.imm4_1;
                     v.imm10_5 = iref.B.imm10_5;
+                    v.imm11   = iref.B.immb11;
                     v.imm12   = iref.B.immb12;
 
                     if (regs.x[iref.B.rs1] != regs.x[iref.B.rs2]) regs.pc += rv::sext<int32_t>(v.imm, 13);
@@ -257,6 +259,7 @@ rv_err_t I::execute_normal(uint32_t inst, registers_t& regs, bus_t& bus, inst_ma
                     /* assign imm */
                     v.imm4_1  = iref.B.imm4_1;
                     v.imm10_5 = iref.B.imm10_5;
+                    v.imm11   = iref.B.immb11;
                     v.imm12   = iref.B.immb12;
 
                     if ((int32_t)regs.x[iref.B.rs1] < (int32_t)regs.x[iref.B.rs2]) regs.pc += rv::sext<int32_t>(v.imm, 13);
@@ -270,6 +273,7 @@ rv_err_t I::execute_normal(uint32_t inst, registers_t& regs, bus_t& bus, inst_ma
                     /* assign imm */
                     v.imm4_1  = iref.B.imm4_1;
                     v.imm10_5 = iref.B.imm10_5;
+                    v.imm11   = iref.B.immb11;
                     v.imm12   = iref.B.immb12;
 
                     if ((int32_t)regs.x[iref.B.rs1] >= (int32_t)regs.x[iref.B.rs2]) regs.pc += rv::sext<int32_t>(v.imm, 13);
@@ -283,10 +287,12 @@ rv_err_t I::execute_normal(uint32_t inst, registers_t& regs, bus_t& bus, inst_ma
                     /* assign imm */
                     v.imm4_1  = iref.B.imm4_1;
                     v.imm10_5 = iref.B.imm10_5;
+                    v.imm11   = iref.B.immb11;
                     v.imm12   = iref.B.immb12;
 
                     if (regs.x[iref.B.rs1] < regs.x[iref.B.rs2]) regs.pc += rv::sext<int32_t>(v.imm, 13);
                     res = RV_EOK;
+                    break;
                 }
                 case 0b111: { /* B BGEU */
                     // if ( x[rs1] >= x[rs2] ) pc += sext(offset)
@@ -295,6 +301,7 @@ rv_err_t I::execute_normal(uint32_t inst, registers_t& regs, bus_t& bus, inst_ma
                     /* assign imm */
                     v.imm4_1  = iref.B.imm4_1;
                     v.imm10_5 = iref.B.imm10_5;
+                    v.imm11   = iref.B.immb11;
                     v.imm12   = iref.B.immb12;
 
                     if (regs.x[iref.B.rs1] >= regs.x[iref.B.rs2]) regs.pc += rv::sext<int32_t>(v.imm, 13);
