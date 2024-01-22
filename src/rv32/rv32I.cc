@@ -15,6 +15,7 @@ rv_err_t I::execute_normal(uint32_t inst, registers_t& regs, bus_t& bus, inst_ma
 {
     rv_err_t res = RV_EUNSUPPORTED;
     inst_type& iref = reinterpret_cast<inst_type&>(inst);
+    regs.x[0] = 0;
     switch(iref.opcode) {
         case 0b00'000'11:   /* LOAD */ {
             switch (iref.I.func3) {
@@ -120,22 +121,22 @@ rv_err_t I::execute_normal(uint32_t inst, registers_t& regs, bus_t& bus, inst_ma
             switch(iref.S.func3) {
                 case 0b000: { /* S SB, Store Byte */
                     // M[ x[rs1] + sext(imm) ] = x[rs2][7:0]
-                    uint32_t addr = regs.x[iref.S.rs1] + rv::sext<int32_t>((uint32_t)iref.S.imm11_5 << 5|iref.S.imm4_0, 12);
+                    uint32_t addr = regs.x[iref.S.rs1] + rv::sext<int32_t>( ((uint32_t)iref.S.imm11_5 << 5) | iref.S.imm4_0, 12 );
                     uint8_t  val  = regs.x[iref.S.rs2];
                     res = bus.write(addr, &val, 1);
                     break;
                 }
                 case 0b001: { /* S SH, Store Half */
                     // M[ x[rs1] + sext(imm) ] = x[rs2][15:0]
-                    uint32_t addr = regs.x[iref.S.rs1] + rv::sext<int32_t>((uint32_t)iref.S.imm11_5 << 5|iref.S.imm4_0, 12);
-                    uint16_t  val  = regs.x[iref.S.rs2];
+                    uint32_t addr = regs.x[iref.S.rs1] + rv::sext<int32_t>( ((uint32_t)iref.S.imm11_5 << 5) | iref.S.imm4_0, 12 );
+                    uint16_t  val = regs.x[iref.S.rs2];
                     res = bus.write(addr, &val, 2);
                     break;
                 }
                 case 0b010: { /* S SW, Store Word */
                     // M[ x[rs1] + sext(imm) ] = x[rs2][31:0]
-                    uint32_t addr = regs.x[iref.S.rs1] + rv::sext<int32_t>((uint32_t)iref.S.imm11_5 << 5|iref.S.imm4_0, 12);
-                    uint32_t  val  = regs.x[iref.S.rs2];
+                    uint32_t addr = regs.x[iref.S.rs1] + rv::sext<int32_t>( ((uint32_t)iref.S.imm11_5 << 5) | iref.S.imm4_0, 12 );
+                    uint32_t  val = regs.x[iref.S.rs2];
                     res = bus.write(addr, &val, 4);
                     break;
                 }
