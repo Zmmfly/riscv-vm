@@ -47,6 +47,72 @@ TEST(BRANCH, template)
 }
 */
 
+TEST(BRANCH, BGEU)
+{
+    rv32::instB_imm v;
+    tester.reset();
+    tester.m_mem->reset();
+
+    auto& regs = tester.regs;
+    auto& test = tester;
+    auto  mem  = tester.m_mem;
+
+    v.imm          = -4;
+    inst.others    = 0;
+    inst.B.func3   = 0b111;
+    inst.B.rs1     = 1;
+    inst.B.rs2     = 2;
+    inst.B.immb12  = v.imm12;
+    inst.B.immb11  = v.imm11;
+    inst.B.imm10_5 = v.imm10_5;
+    inst.B.imm4_1  = v.imm4_1;
+
+    regs.pc            = 12;
+    regs.x[inst.B.rs1] = -4;
+    regs.x[inst.B.rs2] = -4;
+
+    auto res1 = test.exec(inst.u32);
+    EXPECT_EQ(RV_EOK, res1);
+    EXPECT_EQ(8, regs.pc) << "BGEU >= fail";
+}
+
+TEST(BRANCH, BLTU)
+{
+    rv32::instB_imm v;
+    tester.reset();
+    tester.m_mem->reset();
+
+    auto& regs = tester.regs;
+    auto& test = tester;
+    auto  mem  = tester.m_mem;
+
+    v.imm          = -4;
+    inst.others    = 0;
+    inst.B.func3   = 0b110;
+    inst.B.rs1     = 1;
+    inst.B.rs2     = 2;
+    inst.B.immb12  = v.imm12;
+    inst.B.immb11  = v.imm11;
+    inst.B.imm10_5 = v.imm10_5;
+    inst.B.imm4_1  = v.imm4_1;
+
+    regs.pc            = 12;
+    regs.x[inst.B.rs1] = -5;    /* 0xfffffffb */
+    regs.x[inst.B.rs2] = -4;    /* 0xfffffffc */
+
+    auto res1 = test.exec(inst.u32);
+    EXPECT_EQ(RV_EOK, res1);
+    EXPECT_EQ(12, regs.pc) << "BLTU rather fail\n";
+
+    regs.pc            = 12;
+    regs.x[inst.B.rs1] = -4;    /* 0xfffffffc */
+    regs.x[inst.B.rs2] = -5;    /* 0xfffffffb */
+
+    auto res2 = test.exec(inst.u32);
+    EXPECT_EQ(RV_EOK, res2);
+    EXPECT_EQ(8, regs.pc);
+}
+
 TEST(BRANCH, BGE)
 {
     rv32::instB_imm v;
