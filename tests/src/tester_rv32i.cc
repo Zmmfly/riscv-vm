@@ -34,7 +34,7 @@ tester_rv32i::tester_rv32i()
 {
     instmap["I"] = std::make_shared<rv32::v1::I>();
     m_mem        = std::make_shared<mem>();
-    busmgr.mount(0x10000000, 4*1024, m_mem);
+    busmgr.mount(0x10000000, m_mem->m_mem.size(), m_mem);
 }
 
 tester_rv32i::~tester_rv32i()
