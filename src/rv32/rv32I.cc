@@ -64,7 +64,9 @@ rv_err_t I::execute_normal(uint32_t inst, registers_t& regs, bus_t& bus, inst_ma
         case 0b00'011'11:   /* MISC-MEM */ {
             if (iref.fence.func3 == 0b000) return RV_EOK;
             /* FENCE */
-            if (m_fence)m_fence();
+            if (m_fence)m_fence(iref);
+            res = RV_EOK;
+            break;
         }
         case 0b00'100'11:   /* OP-IMM */ {
             switch (iref.I.func3) {
@@ -330,10 +332,11 @@ rv_err_t I::execute_normal(uint32_t inst, registers_t& regs, bus_t& bus, inst_ma
         case 0b11'100'11: { /* SYSTEM */
             if (iref.I.func3 != 0b000) break;
             if (iref.I.imm == 0) {              /* I ECALL */
-                if (m_ecall) m_ecall();
+                if (m_ecall) m_ecall(iref);
             } else if (iref.I.imm == 1) {       /* I EBREAK */
-                if (m_ebreak) m_ebreak();
+                if (m_ebreak) m_ebreak(iref);
             }
+            res = RV_EOK;
             break;
         }
         default: break;
@@ -344,22 +347,22 @@ rv_err_t I::execute_normal(uint32_t inst, registers_t& regs, bus_t& bus, inst_ma
 
 rv_err_t I::set(std::string k, std::any v)
 {
-    rv_err_t res = RV_ETYPE;
-    if (k == "ecall" && v.type() == typeid(std::function<void(void)>))
+    rv_err_t res = RV_EUNSUPPORTED;
+    if (k == "ecall" && v.type() == typeid(ext_call_t))
     {
-        m_ecall = std::any_cast<std::function<void(void)>>(v);
+        m_ecall = std::any_cast<ext_call_t>(v);
         res = RV_EOK;
     }
 
-    if (k == "ebreak" && v.type() == typeid(std::function<void(void)>))
+    if (k == "ebreak" && v.type() == typeid(ext_call_t))
     {
-        m_ebreak = std::any_cast<std::function<void(void)>>(v);
+        m_ebreak = std::any_cast<ext_call_t>(v);
         res = RV_EOK;
     }
 
-    if (k == "fence" && v.type() == typeid(std::function<void(void)>))
+    if (k == "fence" && v.type() == typeid(ext_call_t))
     {
-        m_fence = std::any_cast<std::function<void(void)>>(v);
+        m_fence = std::any_cast<ext_call_t>(v);
         res = RV_EOK;
     }
     return res;

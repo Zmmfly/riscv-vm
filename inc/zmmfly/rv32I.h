@@ -12,6 +12,8 @@ class I
 {
 
 public:
+    using ext_call_t = std::function<void(rv32::inst_type)>;
+
     I();
 
     std::string name();
@@ -21,7 +23,7 @@ public:
     rv_err_t execute_normal(uint32_t inst, registers_t& regs, bus_t& bus, inst_map_t& inst_map);
 
 private:
-    std::function<void(void)> m_ecall, m_ebreak, m_fence;
+    ext_call_t m_ecall, m_ebreak, m_fence;
 };
 
 };
