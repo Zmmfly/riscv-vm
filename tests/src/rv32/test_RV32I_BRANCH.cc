@@ -102,7 +102,7 @@ TEST(BRANCH, BLTU)
 
     auto res1 = test.exec(inst.u32);
     EXPECT_EQ(RV_EOK, res1);
-    EXPECT_EQ(12, regs.pc) << "BLTU rather fail\n";
+    EXPECT_EQ(8, regs.pc) << "BLTU less fail\n";
 
     regs.pc            = 12;
     regs.x[inst.B.rs1] = -4;    /* 0xfffffffc */
@@ -110,7 +110,7 @@ TEST(BRANCH, BLTU)
 
     auto res2 = test.exec(inst.u32);
     EXPECT_EQ(RV_EOK, res2);
-    EXPECT_EQ(8, regs.pc);
+    EXPECT_EQ(12, regs.pc) << "BLTU rather fail\n";
 }
 
 TEST(BRANCH, BGE)
