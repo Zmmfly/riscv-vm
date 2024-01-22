@@ -111,6 +111,15 @@ typedef union instJ_imm{
     };
 }instJ_imm;
 
+typedef union instS_imm{
+    uint32_t imm;
+    struct {
+        uint32_t imm4_0 : 5;
+        uint32_t imm11_5: 7;
+        uint32_t :20;
+    };
+}instS_imm;
+
 using bus_t       = zmmfly::rv::bus_mgr_intf<uint32_t>;
 using bus_intf_t  = zmmfly::rv::bus_intf<uint32_t>;
 using inst_intf_t = zmmfly::rv::inst_intf<uint32_t>;
