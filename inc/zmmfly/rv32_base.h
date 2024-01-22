@@ -93,8 +93,9 @@ typedef union instB_imm{
         uint32_t :1;
         uint32_t imm4_1:4;
         uint32_t imm10_5:6;
+        uint32_t imm11:1;
         uint32_t imm12:1;
-        uint32_t :20;
+        uint32_t :19;
     };
 }instB_imm;
 
