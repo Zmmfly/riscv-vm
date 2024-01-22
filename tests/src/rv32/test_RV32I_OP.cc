@@ -31,7 +31,7 @@ TEST(OP, template)
     inst.R.func7 = ;
     inst.R.rd    = 3;
     inst.R.rs1   = 1;
-    inst.R.rs1   = 2;
+    inst.R.rs2   = 2;
 
     regs.x[inst.R.rs1] = ;
     regs.x[inst.R.rs2] = ;
@@ -56,7 +56,7 @@ TEST(OP, AND)
     inst.R.func7 = 0b0000000;
     inst.R.rd    = 3;
     inst.R.rs1   = 1;
-    inst.R.rs1   = 2;
+    inst.R.rs2   = 2;
 
     regs.x[inst.R.rs1] = 0x80000000;
     regs.x[inst.R.rs2] = 0x80000008;
@@ -80,7 +80,7 @@ TEST(OP, OR)
     inst.R.func7 = 0b0000000;
     inst.R.rd    = 3;
     inst.R.rs1   = 1;
-    inst.R.rs1   = 2;
+    inst.R.rs2   = 2;
 
     regs.x[inst.R.rs1] = 0x80000000;
     regs.x[inst.R.rs2] = 0x00000008;
@@ -104,7 +104,7 @@ TEST(OP, SRA)
     inst.R.func7 = 0b0100000;
     inst.R.rd    = 3;
     inst.R.rs1   = 1;
-    inst.R.rs1   = 2;
+    inst.R.rs2   = 2;
 
     regs.x[inst.R.rs1] = -1024; /* 0xfffffc00 */
     regs.x[inst.R.rs2] = 3;
@@ -128,7 +128,7 @@ TEST(OP, SRL)
     inst.R.func7 = 0b0000000;
     inst.R.rd    = 3;
     inst.R.rs1   = 1;
-    inst.R.rs1   = 2;
+    inst.R.rs2   = 2;
 
     regs.x[inst.R.rs1] = 0x00000028;
     regs.x[inst.R.rs2] = 3;
@@ -152,7 +152,7 @@ TEST(OP, XOR)
     inst.R.func7 = 0b0000000;
     inst.R.rd    = 3;
     inst.R.rs1   = 1;
-    inst.R.rs1   = 2;
+    inst.R.rs2   = 2;
 
     regs.x[inst.R.rs1] = 0xfffffffe;
     regs.x[inst.R.rs2] = 0x5a5a5a5a;
