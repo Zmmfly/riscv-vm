@@ -8,18 +8,18 @@ License: GPL-V3
 ⏳ = in progress
 
 - ⏳ RV32G
-  - ⏳ I
+  - [x] I
     - [x] AUIPC `test pass`
     - [x] BRANCH `test pass`
     - [x] JAL `test pass`
     - [x] JALR `test pass`
-    - [ ] LUI `wait test`
-    - [ ] MISC-MEM `wait test`
+    - [x] LUI `wait test`
+    - [x] MISC-MEM `wait test`
     - [x] OP-IMM `test pass`
     - [x] OP `test pass`
     - [x] STORE `wait test`
-    - [ ] SYSTEM `wait test`
-  - [ ] M
+    - [x] SYSTEM `wait test`
+  - ⏳ M
   - [ ] A
   - [ ] F
   - [ ] D
@@ -38,3 +38,4 @@ License: GPL-V3
 - [ ] cache
   - [ ] icache
   - [ ] dcache
+- [ ] MMU
