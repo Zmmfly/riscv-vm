@@ -63,7 +63,7 @@ rv_err_t I::execute_normal(uint32_t inst, registers_t& regs, bus_t& bus, inst_ma
             break;
         }
         case 0b00'011'11:   /* MISC-MEM */ {
-            if (iref.fence.func3 == 0b000) return RV_EOK;
+            if (iref.fence.func3 != 0b000 || iref.fence.rd != 0 || iref.fence.rs1 != 0) break;
             /* FENCE */
             if (m_fence)m_fence(iref);
             res = RV_EOK;
