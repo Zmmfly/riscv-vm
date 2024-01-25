@@ -17,6 +17,13 @@ using inst_type = union inst_type
         uint32_t opcode: 7;
         uint32_t others:25;
     };
+    
+    struct {
+        uint32_t      : 7;
+        uint32_t rd   : 5;
+        uint32_t func3: 3;
+        uint32_t      :17;
+    };
 
     struct {
         uint32_t opcode: 7;
