@@ -5,7 +5,7 @@ target("test_rv32_common")
     set_languages("c++20")
     add_deps("rvvm")
 
-    add_files("src/tester_rv32i.cc")
+    add_files("src/tester_rv32.cc")
     add_includedirs("inc", {public=true})
 
 for _, file in ipairs(os.files("src/rv32/test_*.cc")) do
