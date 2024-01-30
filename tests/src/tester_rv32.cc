@@ -48,5 +48,9 @@ void tester_rv32i::reset()
 
 rv_err_t tester_rv32i::exec(uint32_t inst)
 {
-    return instmap["I"]->execute_normal(inst, regs, busmgr, instmap);
+    for (auto it:instmap) {
+        auto ret = it.second->execute_normal(inst, regs, busmgr, instmap);
+        if (ret != RV_EUNSUPPORTED) return ret;
+    }
+    return RV_EUNSUPPORTED;
 }
