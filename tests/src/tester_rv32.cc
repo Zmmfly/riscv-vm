@@ -33,6 +33,7 @@ rv_err_t mem::write(uint32_t offset, void* ptr, size_t len)
 tester_rv32i::tester_rv32i()
 {
     instmap["I"] = std::make_shared<rv32::v1::I>();
+    instmap["M"] = std::make_shared<rv32::v1::M>();
     m_mem        = std::make_shared<mem>();
     busmgr.mount(0x10000000, m_mem->m_mem.size(), m_mem);
 }
