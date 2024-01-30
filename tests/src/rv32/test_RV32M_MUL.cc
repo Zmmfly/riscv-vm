@@ -56,8 +56,8 @@ TEST(M_mul, mulhsu)
     inst.R.rs1   = 1;
     inst.R.rs2   = 2;
 
-    regs.x[inst.R.rs1] = 0x8000000;
-    regs.x[inst.R.rs2] = -2;
+    regs.x[inst.R.rs1] = 0x80000000;    /* int32: -2147483648 */
+    regs.x[inst.R.rs2] = -2;            /* uint32: 4294967294 */
 
     auto res1 = test.exec(inst.u32);
     EXPECT_EQ(RV_EOK, res1);
@@ -80,7 +80,7 @@ TEST(M_mul, mulh)
     inst.R.rs1   = 1;
     inst.R.rs2   = 2;
 
-    regs.x[inst.R.rs1] = 0x8000000;
+    regs.x[inst.R.rs1] = 0x80000000;
     regs.x[inst.R.rs2] = -2;
 
     auto res1 = test.exec(inst.u32);

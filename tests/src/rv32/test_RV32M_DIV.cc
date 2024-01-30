@@ -61,7 +61,7 @@ TEST(M_div, rem)
 
     auto res1 = test.exec(inst.u32);
     EXPECT_EQ(RV_EOK, res1);
-    EXPECT_EQ(-5, (int32_t)regs.x[inst.R.rd]);
+    EXPECT_EQ(-2, (int32_t)regs.x[inst.R.rd]);
 }
 
 TEST(M_div, divu)
