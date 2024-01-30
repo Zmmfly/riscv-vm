@@ -5,6 +5,11 @@ namespace zmmfly::rv32::v1
 M::M()
 {}
 
+std::string M::name()
+{
+    return "M";
+}
+
 rv_err_t M::execute_normal(uint32_t inst, registers_t& regs, bus_t& bus, inst_map_t& inst_map)
 {
     rv_err_t res = RV_EUNSUPPORTED;
@@ -19,12 +24,13 @@ rv_err_t M::execute_normal(uint32_t inst, registers_t& regs, bus_t& bus, inst_ma
 
             } else if (iref.func3 == 0b001) { // mulh
                 // x[rd] = ((s64) x[rs1] * (s64) x[rs2]) >> XLEN
-                regs.x[iref.R.rd] = ( (int64_t)regs.x[iref.R.rs1] * (int64_t)regs.x[iref.R.rs2] ) >> 32;
+                // regs.x[iref.R.rd] = ( (int64_t)regs.x[iref.R.rs1] * (int64_t)regs.x[iref.R.rs2] ) >> 32;
+                regs.x[iref.R.rd] = ( rv::sext<int64_t>(regs.x[iref.R.rs1], 32) * rv::sext<int64_t>(regs.x[iref.R.rs2], 32) ) >> 32;
                 res = RV_EOK;
 
             } else if (iref.func3 == 0b010) { // mulhsu
                 // x[rd] = ((s64) x[rs1] * (u64) x[rs2]) >> XLEN
-                regs.x[iref.R.rd] = ( (int64_t)regs.x[iref.R.rs1] * (uint64_t)regs.x[iref.R.rs2] ) >> 32;
+                regs.x[iref.R.rd] = ( rv::sext<int64_t>(regs.x[iref.R.rs1], 32) * (uint64_t)regs.x[iref.R.rs2] ) >> 32;
                 res = RV_EOK;
 
             } else if (iref.func3 == 0b011) { // mulhu

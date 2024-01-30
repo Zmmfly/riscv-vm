@@ -18,8 +18,6 @@ public:
 
     std::string name();
 
-    rv_err_t set(std::string k, std::any v);
-
     rv_err_t execute_normal(uint32_t inst, registers_t& regs, bus_t& bus, inst_map_t& inst_map);
 
 private:
