@@ -13,14 +13,14 @@ License: GPL-V3
     - [x] BRANCH `test pass`
     - [x] JAL `test pass`
     - [x] JALR `test pass`
-    - [x] LUI `wait test`
-    - [x] MISC-MEM `wait test`
+    - [x] LUI `test pass`
+    - [x] MISC-MEM `test pass`
     - [x] OP-IMM `test pass`
     - [x] OP `test pass`
-    - [x] STORE `wait test`
-    - [x] SYSTEM `wait test`
-  - ⏳ M
-  - [ ] A
+    - [x] STORE `test pass`
+    - [x] SYSTEM `test pass`
+  - [x] M `test pass`
+  - ⏳ A
   - [ ] F
   - [ ] D
   - [ ] Zicsr
