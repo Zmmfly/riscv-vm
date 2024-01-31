@@ -2,6 +2,8 @@
 #define __ZMMFLY_RV_COMMON_BUSMGR_H__
 
 #include "zmmfly/rv_intf.h"
+#include <string>
+#include <functional>
 
 namespace zmmfly::rv
 {
@@ -11,6 +13,10 @@ class busmgr
 :public bus_mgr_intf<T>
 {
 public:
+    using rev_fn_t          = std::function<void(T, T)>;
+    using rev_set_arg_t     = std::tuple<T, T, rev_fn_t>;
+    using rev_rst_arg_t     = T;
+    using op_arg_t          = std::tuple<std::string, std::any>;
     using bus_intf_ptr_t    = std::shared_ptr<bus_intf<T>>;
     using mem_item_t        = std::tuple<T, size_t, bus_intf_ptr_t>;
     using mem_target_item_t = std::tuple<bus_intf_ptr_t, T, size_t>;   /* buf interface, offset, size */
@@ -41,48 +47,145 @@ public:
         std::sort(m_mems.begin(), m_mems.end(), [](mem_item_t& a, mem_item_t& b){
             return std::get<0>(a) < std::get<0>(b);
         });
+
         return RV_EOK;
     }
 
-    rv_err_t read(T addr, void* ptr, size_t len)
+    rv_err_t read(T addr, void* ptr, size_t len, std::any arg)
     {
-        T_lock_guard lck(m_mtx_mems);
         mem_targets_t mems;
-        if (m_is_ibus && addr&1) return RV_EUNALIGNED;
-        if (!detect_mems(addr, len, mems)) return RV_EBUSFAULT;
+        {
+            T_lock_guard lck(m_mtx_mems);
+            if (m_is_ibus && addr) return RV_EUNALIGNED;
+            if (!detect_mems(addr, len, mems)) return RV_EBUSFAULT;
+        }
 
+        // T_lock_guard lck(m_mtx_mem_rd);
         size_t cnt = 0;
+        uint8_t* p = (uint8_t*)ptr;
         for (auto mem:mems) {
-            uint8_t* p = (uint8_t*)ptr;
             auto [intf, offset, len] = mem;
-            auto res = intf->read(offset, (void*)p, len);
+            auto res = intf->read(offset, (void*)(p+cnt), len);
             if (res != RV_EOK) return res;
             cnt += len;
-            p   += len;
         }
+
+        op_exec(arg);
         return RV_EOK;
     }
 
-    rv_err_t write(T addr, void* ptr, size_t len)
+    rv_err_t write(T addr, void* ptr, size_t len, std::any arg)
     {
-        T_lock_guard lck(m_mtx_mems);
         mem_targets_t mems;
-        if (m_is_ibus) return RV_EBUSFAULT;
-        if (!detect_mems(addr, len, mems)) return RV_EBUSFAULT;
+        {
+            T_lock_guard lck(m_mtx_mems);
+            if (m_is_ibus) return RV_EBUSFAULT;
+            if (!detect_mems(addr, len, mems)) return RV_EBUSFAULT;
+        }
 
+        T_lock_guard lck(m_mtx_mem_wr);
         size_t cnt = 0;
+        uint8_t* p = (uint8_t*)ptr;
         for (auto mem:mems) {
-            uint8_t* p = (uint8_t*)ptr;
             auto [intf, offset, len] = mem;
-            auto res = intf->write(offset, (void*)p, len);
+            auto res = intf->write(offset, (void*)(p+cnt), len);
             if (res != RV_EOK) return res;
             cnt += len;
-            p   += len;
         }
+
+        op_exec(arg);
         return RV_EOK;
+    }
+
+    rv_err_t set(std::string k, std::any v) { 
+        return RV_EUNSUPPORTED; 
     }
 
 private:
+
+    void rev_update(T addr, void* new_ptr, size_t len)
+    {
+        T_lock_guard lck(m_mtx_rev);
+        auto end = addr + len;
+
+        for (auto &it:m_revs) {
+            auto [val, fn] = it.second;
+
+            // beg
+            if ((addr >= it.first && addr < it.first+4)) {
+
+                auto off = addr - it.first;
+                auto p = (uint8_t*)&val;
+                auto real_len = len > sizeof(T) - off ? sizeof(T) - off : len;
+
+                memcpy(p+off, new_ptr, real_len);
+                if (fn)fn(it.first, val);
+                break;
+            }
+
+            // end
+            if ( end > it.first && end < it.first + 4) {
+                auto size = end - it.first;
+                auto src = (uint8_t*)new_ptr;
+                auto dst = (uint8_t*)&val;
+                src += len;
+                src -= size;
+                memcpy(dst, src, size);
+            }
+        }
+    }
+
+    void op_exec(std::any arg)
+    {
+        if (!arg.has_value()) return;
+        if (typeid(op_arg_t) != arg.type()) return;
+        auto [key, args] = std::any_cast<op_arg_t>(arg);
+
+        if (key == "rev_set") {
+            if (typeid(rev_set_arg_t) != args.type()) return;
+            rev_set(args);
+        }
+        else if (key == "rev_rst") {
+            if (typeid(rev_rst_arg_t) != args.type()) return;
+            rev_rst(args);
+        }
+    }
+
+    bool rev_rst(std::any arg) {
+        if (typeid(rev_rst_arg_t) != arg.type()) return false;
+        auto addr = std::any_cast<rev_rst_arg_t>(arg);
+        if (addr & 0x3) return false;
+        T_lock_guard lck(m_mtx_rev);
+
+        for (auto it=m_revs.begin(); it!=m_revs.end(); it++)
+        {
+            if (it->first == addr) {
+                m_revs.erase(it);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    bool rev_set(std::any arg)
+    {
+        if (typeid(rev_set_arg_t) != arg.type()) return false;
+        T_lock_guard lck(m_mtx_rev);
+        // addr, value, fn
+        auto [addr, value, fn] = std::any_cast<rev_set_arg_t>(arg);
+
+        // skip if addr not align to 4
+        // 0x3 = 0b0011 (BCD 8421 code)
+        if (addr & 0x3) return false;
+
+        // skip if fn invalid
+        if (!fn) return false;
+
+        m_revs[addr] = std::tuple<T, rev_fn_t>(value, fn);
+        return true;
+    }
+
     /**
      * @brief Detect memorys for address start and size
      * 
@@ -172,7 +275,12 @@ private:
 
 private:
     std::vector<mem_item_t> m_mems;
+    // key: addr, value: tuple<value, fn>
+    std::map<T, std::tuple<T, rev_fn_t>> m_revs;
     T_mtx m_mtx_mems;
+    // T_mtx m_mtx_mem_rd;
+    T_mtx m_mtx_mem_wr;
+    T_mtx m_mtx_rev;
     bool m_is_ibus = false;
 };
 

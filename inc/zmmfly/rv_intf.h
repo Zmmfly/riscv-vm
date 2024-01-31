@@ -44,19 +44,30 @@ public:
      * @param addr 
      * @param ptr 
      * @param len 
+     * @param arg
      * @return rv_err_t 
      */
-    virtual rv_err_t read(T addr, void* ptr, size_t len)  = 0;
+    virtual rv_err_t read(T addr, void* ptr, size_t len, std::any arg = {})  = 0;
 
     /**
      * @brief Write memory to bus
      * 
      * @param addr 
      * @param ptr 
-     * @param len 
+     * @param len
+     * @param arg 
      * @return rv_err_t 
      */
-    virtual rv_err_t write(T addr, void* ptr, size_t len) = 0;
+    virtual rv_err_t write(T addr, void* ptr, size_t len, std::any = {}) = 0;
+
+    /**
+     * @brief Set any value
+     * 
+     * @param k 
+     * @param v 
+     * @return rv_err_t 
+     */
+    virtual rv_err_t set(std::string k, std::any v) = 0;
 };
 
 template<typename T = uint32_t>
@@ -83,7 +94,10 @@ public:
      * @param insts instruction string, like IMAFDZicsrZifenceiC
      * @return rv_err_t 
      */
-    virtual rv_err_t insts_notify(std::string insts)                    { return RV_EUNSUPPORTED; };
+    virtual rv_err_t insts_notify(std::string insts) 
+    {
+        return RV_EUNSUPPORTED;
+    }
 
     /**
      * @brief Set any value
@@ -92,7 +106,10 @@ public:
      * @param v 
      * @return rv_err_t 
      */
-    virtual rv_err_t set(std::string k, std::any v)                     { return RV_EUNSUPPORTED; };
+    virtual rv_err_t set(std::string k, std::any v) 
+    {
+        return RV_EUNSUPPORTED;
+    }
 
     /**
      * @brief Get any value
@@ -101,7 +118,10 @@ public:
      * @param v use pointer as std::any to get value
      * @return rv_err_t 
      */
-    virtual rv_err_t get(std::string k, std::any v)                     { return RV_EUNSUPPORTED; };
+    virtual rv_err_t get(std::string k, std::any v) 
+    {
+        return RV_EUNSUPPORTED; 
+    }
 
     /**
      * @brief Normal instruction executor
@@ -112,8 +132,8 @@ public:
      * @param inst_map
      * @return rv_err_t 
      */
-    virtual rv_err_t execute_normal(T inst, registers_t& regs, bus_mgr_intf<T>& dbus, inst_map_t& inst_map)
-    { 
+    virtual rv_err_t execute_normal(T inst, registers_t& regs, bus_mgr_intf<T>& dbus, inst_map_t& inst_map) 
+    {
         return RV_EUNSUPPORTED; 
     };
 
