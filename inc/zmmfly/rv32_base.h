@@ -55,6 +55,17 @@ using inst_type = union inst_type
         uint32_t rd    : 5;
         uint32_t func3 : 3;
         uint32_t rs1   : 5;
+        uint32_t rs2   : 5;
+        uint32_t rl    : 1;
+        uint32_t aq    : 1;
+        uint32_t func5 : 5;
+    }R_amo;
+
+    struct {
+        uint32_t opcode: 7;
+        uint32_t rd    : 5;
+        uint32_t func3 : 3;
+        uint32_t rs1   : 5;
         uint32_t imm   : 12;    /* imm[11:0] */
     }I;
 
