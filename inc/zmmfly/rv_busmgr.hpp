@@ -131,6 +131,8 @@ private:
                 src += len;
                 src -= size;
                 memcpy(dst, src, size);
+                if (fn)fn(it.first, val);
+                break;
             }
         }
     }
