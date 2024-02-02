@@ -11,7 +11,7 @@ class A
 {
 
 public:
-    A() {};
+    A();
 
     std::string name();
 
