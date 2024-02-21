@@ -13,14 +13,14 @@ class busmgr
 :public bus_mgr_intf<T>
 {
 public:
-    using rev_fn_t          = std::function<void(T, T)>;
-    using rev_set_arg_t     = std::tuple<T, T, rev_fn_t>;
-    using rev_rst_arg_t     = T;
     using op_arg_t          = std::tuple<std::string, std::any>;
     using bus_intf_ptr_t    = std::shared_ptr<bus_intf<T>>;
     using mem_item_t        = std::tuple<T, size_t, bus_intf_ptr_t>;
     using mem_target_item_t = std::tuple<bus_intf_ptr_t, T, size_t>;   /* buf interface, offset, size */
     using mem_targets_t     = std::vector<mem_target_item_t>;
+    using listener_t        = bus_mgr_intf<T>::listener_t;
+    using listener_info_t   = bus_mgr_intf<T>::listener_info_t;
+
     busmgr(bool is_ibus = false)
     {
         m_is_ibus = is_ibus;
@@ -56,7 +56,7 @@ public:
         mem_targets_t mems;
         {
             T_lock_guard lck(m_mtx_mems);
-            if (m_is_ibus && addr) return RV_EUNALIGNED;
+            if (m_is_ibus && ((len == 4 && (addr&0b11)) || (len == 2 && (addr&1))) ) return RV_EUNALIGNED;
             if (!detect_mems(addr, len, mems)) return RV_EBUSFAULT;
         }
 
@@ -70,7 +70,29 @@ public:
             cnt += len;
         }
 
-        op_exec(arg);
+        feed_listeners_rd(addr, ptr, len);
+
+        return RV_EOK;
+    }
+
+    rv_err_t read_listen(T addr, size_t len, listener_t fn, T& listen_id)
+    {
+        if (is_overflow(addr, len)) return RV_EOVERFLOW;
+        T_lock_guard lck(m_mtx_listen_rd);
+
+        listen_id = m_listen_rd_count++;
+        m_listeners_rd[listen_id] = std::make_tuple(addr, len, fn);
+        
+        return RV_EOK;
+    }
+
+    rv_err_t read_unlisten(T listen_id)
+    {
+        T_lock_guard lck(m_mtx_listen_rd);
+
+        if (m_listeners_rd.find(listen_id) == m_listeners_rd.end()) return RV_ENOTFOUND;
+        m_listeners_rd.erase(listen_id);
+
         return RV_EOK;
     }
 
@@ -79,11 +101,11 @@ public:
         mem_targets_t mems;
         {
             T_lock_guard lck(m_mtx_mems);
-            if (m_is_ibus) return RV_EBUSFAULT;
+            if (m_is_ibus && ((len == 4 && (addr&0b11)) || (len == 2 && (addr&1))) ) return RV_EUNALIGNED;
             if (!detect_mems(addr, len, mems)) return RV_EBUSFAULT;
         }
 
-        T_lock_guard lck(m_mtx_mem_wr);
+        // T_lock_guard lck(m_mtx_mem_wr);
         size_t cnt = 0;
         uint8_t* p = (uint8_t*)ptr;
         for (auto mem:mems) {
@@ -93,7 +115,29 @@ public:
             cnt += len;
         }
 
-        op_exec(arg);
+        feed_listeners_wr(addr, ptr, len);
+
+        return RV_EOK;
+    }
+
+    rv_err_t write_listen(T addr, size_t len, listener_t fn, T& listen_id)
+    {
+        if (is_overflow(addr, len)) return RV_EOVERFLOW;
+        T_lock_guard lck(m_mtx_listen_wr);
+
+        listen_id = m_listen_wr_count++;
+        m_listeners_wr[listen_id] = listener_info_t(addr, len, fn);
+        
+        return RV_EOK;
+    }
+
+    rv_err_t write_unlisten(T listen_id)
+    {
+        T_lock_guard lck(m_mtx_listen_wr);
+
+        if (m_listeners_wr.find(listen_id) == m_listeners_wr.end()) return RV_ENOTFOUND;
+        m_listeners_wr.erase(listen_id);
+
         return RV_EOK;
     }
 
@@ -102,90 +146,84 @@ public:
     }
 
 private:
-
-    void rev_update(T addr, void* new_ptr, size_t len)
+    void feed_listeners_rd(T mem_addr, void* mem_ptr, size_t mem_len)
     {
-        T_lock_guard lck(m_mtx_rev);
-        auto end = addr + len;
+        feed_listeners(mem_addr, mem_ptr, mem_len, m_mtx_listen_rd, m_listeners_rd);
+    }
 
-        for (auto &it:m_revs) {
-            auto [val, fn] = it.second;
+    void feed_listeners_wr(T mem_addr, void* mem_ptr, size_t mem_len)
+    {
+        feed_listeners(mem_addr, mem_ptr, mem_len, m_mtx_listen_wr, m_listeners_wr);
+    }
 
-            // beg
-            if ((addr >= it.first && addr < it.first+4)) {
+    void feed_listeners(T mem_addr, void* mem_ptr, size_t mem_len, T_mtx& mtx, std::map<T, listener_info_t>& maps)
+    {
+        T_lock_guard lck(mtx);
+        for (auto it:maps) {
+            T      listen_addr = std::get<0>(it.second);
+            size_t listen_len  = std::get<1>(it.second);
+            auto   listen_call = std::get<2>(it.second);
+            T listen_off = 0, mem_off = 0;
+            size_t ovl_len = 0;
 
-                auto off = addr - it.first;
-                auto p = (uint8_t*)&val;
-                auto real_len = len > sizeof(T) - off ? sizeof(T) - off : len;
+            if (!detect_overlap(listen_addr, listen_len, mem_addr, mem_len, mem_off, listen_off, ovl_len)) continue;
 
-                memcpy(p+off, new_ptr, real_len);
-                if (fn)fn(it.first, val);
-                break;
-            }
-
-            // end
-            if ( end > it.first && end < it.first + 4) {
-                auto size = end - it.first;
-                auto src = (uint8_t*)new_ptr;
-                auto dst = (uint8_t*)&val;
-                src += len;
-                src -= size;
-                memcpy(dst, src, size);
-                if (fn)fn(it.first, val);
-                break;
-            }
+            listen_call(listen_addr, listen_off, mem_ptr, ovl_len);
         }
     }
 
-    void op_exec(std::any arg)
+    bool detect_overlap(T flt_addr, size_t flt_len, T dst_addr, size_t dst_len, 
+        T& dst_off, T& flt_off, size_t& overlap_len)
     {
-        if (!arg.has_value()) return;
-        if (typeid(op_arg_t) != arg.type()) return;
-        auto [key, args] = std::any_cast<op_arg_t>(arg);
-
-        if (key == "rev_set") {
-            if (typeid(rev_set_arg_t) != args.type()) return;
-            rev_set(args);
-        }
-        else if (key == "rev_rst") {
-            if (typeid(rev_rst_arg_t) != args.type()) return;
-            rev_rst(args);
-        }
-    }
-
-    bool rev_rst(std::any arg) {
-        if (typeid(rev_rst_arg_t) != arg.type()) return false;
-        auto addr = std::any_cast<rev_rst_arg_t>(arg);
-        if (addr & 0x3) return false;
-        T_lock_guard lck(m_mtx_rev);
-
-        for (auto it=m_revs.begin(); it!=m_revs.end(); it++)
+        // dst_addr out of flt range
+        if (dst_addr < flt_addr && dst_addr + dst_len < flt_addr || dst_addr >= flt_addr + flt_len) 
         {
-            if (it->first == addr) {
-                m_revs.erase(it);
-                return true;
-            }
+            return false;
         }
-
-        return false;
+ 
+        dst_off     = (dst_addr < flt_addr) ? flt_addr - dst_addr : 0;
+        flt_off     = (dst_addr < flt_addr) ? 0 : dst_addr - flt_addr;
+        overlap_len = (dst_addr < flt_addr) ? dst_addr + dst_len - flt_addr : flt_addr + flt_len - dst_addr;
+        return true;
     }
 
-    bool rev_set(std::any arg)
+    /**
+     * @brief Check address and len range is overflow or not
+     * 
+     * @param addr 
+     * @param len 
+     * @return true 
+     * @return false 
+     */
+    bool is_overflow(T addr, size_t len)
     {
-        if (typeid(rev_set_arg_t) != arg.type()) return false;
-        T_lock_guard lck(m_mtx_rev);
-        // addr, value, fn
-        auto [addr, value, fn] = std::any_cast<rev_set_arg_t>(arg);
+        T      addr_curr = addr;
+        size_t rm        = len;
+        size_t oplen     = 0;
+        size_t cnt       = 0;
 
-        // skip if addr not align to 4
-        // 0x3 = 0b0011 (BCD 8421 code)
-        if (addr & 0x3) return false;
+        mem_item_t mem;
+        do {
+            /* find current match */
+            if (!detect_mem(addr_curr, mem)) return true;
 
-        // skip if fn invalid
-        if (!fn) return false;
+            /* get mem info */
+            T    mem_addr = std::get<0>(mem);
+            T    mem_size = std::get<1>(mem);
+            auto mem_intf = std::get<2>(mem);
 
-        m_revs[addr] = std::tuple<T, rev_fn_t>(value, fn);
-        return true;
+            /* get mem rm and offset */
+            T mem_rm     = mem_addr + mem_size - addr_curr;
+            T mem_offset = addr_curr - mem_addr;
+
+            oplen = mem_rm > rm ? rm : mem_rm;
+
+            /* increase and decrease */
+            rm        -= oplen;
+            cnt       += oplen;
+            addr_curr += oplen;
+        }while(rm);
+        return false;
     }
 
     /**
@@ -277,12 +315,12 @@ private:
 
 private:
     std::vector<mem_item_t> m_mems;
-    // key: addr, value: tuple<value, fn>
-    std::map<T, std::tuple<T, rev_fn_t>> m_revs;
+    std::map<T, listener_info_t> m_listeners_rd, m_listeners_wr;
     T_mtx m_mtx_mems;
-    // T_mtx m_mtx_mem_rd;
-    T_mtx m_mtx_mem_wr;
-    T_mtx m_mtx_rev;
+    T_mtx m_mtx_mem_rd, m_mtx_mem_wr;
+    T_mtx m_mtx_listen_rd, m_mtx_listen_wr;
+    T m_listen_rd_count = 0;
+    T m_listen_wr_count = 0;
     bool m_is_ibus = false;
 };
 
