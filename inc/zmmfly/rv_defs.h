@@ -8,21 +8,26 @@
 #include <algorithm>
 #include <any>
 #include <map>
+#include <unordered_map>
 #include <tuple>
 #include <vector>
+#include <functional>
 
 namespace zmmfly
 {
 
 using rv_err_t = enum rv_err_t
 {
-    RV_EOK          = 0,
-    RV_EUNALIGNED   = 1,
-    RV_EUNSUPPORTED = 2,
-    RV_EOVERLAP     = 3,
-    RV_ETYPE        = 4,
-    RV_EBUSFAULT    = 5,
-    RV_EIO
+    RV_EOK = 0,
+    RV_EUNALIGNED,
+    RV_EUNSUPPORTED,
+    RV_EOVERLAP,
+    RV_EOVERFLOW,
+    RV_ERANGE,
+    RV_ETYPE,
+    RV_EBUSFAULT,
+    RV_EIO,
+    RV_ENOTFOUND,
 };
 
 };
