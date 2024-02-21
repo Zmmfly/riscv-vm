@@ -1,4 +1,5 @@
-add_requires("gtest", "fmt")
+add_requires("gtest")
+add_requires("fmt", { configs = { header_only = true } })
 
 target("test_rv32_common")
     set_kind("static")

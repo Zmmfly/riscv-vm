@@ -1,4 +1,5 @@
 #include "tester_rv32i.h"
+#include <cstring>
 
 mem::mem(size_t mem_size)
 {
