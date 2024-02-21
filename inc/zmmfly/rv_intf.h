@@ -26,6 +26,9 @@ public:
 template<typename T>
 class bus_mgr_intf{
 public:
+    using listener_t      = std::function<void(T addr, T offset, void* ptr, size_t len)> ;
+    using listener_info_t = std::tuple<T, size_t, listener_t> ;
+
     virtual ~bus_mgr_intf() {};
 
     /**
@@ -50,6 +53,25 @@ public:
     virtual rv_err_t read(T addr, void* ptr, size_t len, std::any arg = {})  = 0;
 
     /**
+     * @brief Listen read
+     * 
+     * @param addr listen address of begin
+     * @param len listen length
+     * @param fn listen callback, the first arg is addr, second is ptr, third is size
+     * @param listen_id listen id
+     * @return rv_err_t 
+     */
+    virtual rv_err_t read_listen(T addr, size_t len, listener_t fn, T& listen_id) = 0;
+
+    /**
+     * @brief Unlisten read
+     * 
+     * @param listen_id 
+     * @return rv_err_t 
+     */
+    virtual rv_err_t read_unlisten(T listen_id) = 0;
+
+    /**
      * @brief Write memory to bus
      * 
      * @param addr 
@@ -58,7 +80,11 @@ public:
      * @param arg 
      * @return rv_err_t 
      */
-    virtual rv_err_t write(T addr, void* ptr, size_t len, std::any = {}) = 0;
+    virtual rv_err_t write(T addr, void* ptr, size_t len, std::any arg = {}) = 0;
+
+    virtual rv_err_t write_listen(T addr, size_t len, listener_t fn, T& listen_id) = 0;
+
+    virtual rv_err_t write_unlisten(T listen_id) = 0;
 
     /**
      * @brief Set any value
