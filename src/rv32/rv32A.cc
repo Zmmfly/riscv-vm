@@ -15,45 +15,98 @@ rv_err_t A::execute_normal(uint32_t inst, registers_t& regs, bus_t& bus, inst_ma
     rv_err_t res = RV_EUNSUPPORTED;
     inst_type& iref = reinterpret_cast<inst_type&>(inst);
     regs.x[0] = 0;
-    switch(iref.opcode){
-        case 0b01'011'11: {
-            switch(iref.R_amo.func5) {
-                case 0b000'10:  /* lr.w */ {
-                    break;
-                }
-                case 0b000'11:  /* sc.w */ {
-                    break;
-                }
-                case 0b000'01:  /* amoswap.w */ {
-                    break;
-                }
-                case 0b000'00:  /* amoadd.w */ {
-                    break;
-                }
-                case 0b001'00:  /* amoxor.w */ {
-                    break;
-                }
-                case 0b011'00:  /* amoand.w */ {
-                    break;
-                }
-                case 0b010'00:  /* amoor.w */ {
-                    break;
-                }
-                case 0b100'00:  /* amomin.w */ {
-                    break;
-                }
-                case 0b101'00:  /* amomax.w */ {
-                    break;
-                }
-                case 0b110'00:  /* amominu.w */ {
-                    break;
-                }
-                case 0b111'00:  /* amomaxu.w */ {
-                    break;
-                }
-                default:
-                    break;
+    if (iref.opcode != 0b01'011'11 || iref.R_amo.func3 != 0b010) return res;
+    switch(iref.R_amo.func5) {
+        case 0b000'10:  /* lr.w */ {
+            auto addr = regs.x[iref.R_amo.rs1];
+            // check align
+            if (addr & 0x3) {
+                res = RV_EUNALIGNED;
+                break;
             }
+
+            uint32_t value = 0;
+            if (m_revs.find(addr) == m_revs.end()) {
+                uint32_t listener_id = 0;
+
+                /* read and check */
+                res = bus.read(addr, &value, 4);
+                if (res != RV_EOK) break;
+
+                /* register listener */
+                auto fn = std::bind(&A::listener_write, this, 
+                    std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4);
+                bus.write_listen(addr, 4, fn, listener_id);
+
+                /* add to revs */
+                std::lock_guard lck(m_mtx_revs);
+                m_revs[addr] = std::make_tuple(value, false, listener_id);
+
+            } else {
+                auto res = bus.read(addr, &value, 4);
+                std::get<1>(m_revs[addr]) = value;
+            }
+            regs.x[iref.R_amo.rd] = value;
+            break;
+        }
+        case 0b000'11:  /* sc.w */ {
+            auto addr = regs.x[iref.R_amo.rs1];
+            if (addr & 0x3) {
+                res = RV_EUNALIGNED;
+                break;
+            }
+
+            uint32_t value     = 0;
+            uint32_t listen_id = 0;
+            bool     changed   = false;
+
+            std::lock_guard lck(m_mtx_revs);
+            if (m_revs.find(addr) == m_revs.end()) {
+                regs.x[iref.R_amo.rd] = 1;
+                break;
+            }
+        
+            std::tie(value, changed, listen_id) = m_revs[addr];
+
+            /* unlisten */
+            bus.write_unlisten(listen_id);
+
+            /* break early if changed */
+            if (changed) {
+                regs.x[iref.R_amo.rd] = 2;
+                break;
+            }
+
+            res = bus.write(regs.x[iref.R_amo.rs1], &regs.x[iref.R_amo.rs2], sizeof(regs.x[iref.R_amo.rs2]));
+            regs.x[iref.R_amo.rd] = 0;
+
+            break;
+        }
+        case 0b000'01:  /* amoswap.w */ {
+            break;
+        }
+        case 0b000'00:  /* amoadd.w */ {
+            break;
+        }
+        case 0b001'00:  /* amoxor.w */ {
+            break;
+        }
+        case 0b011'00:  /* amoand.w */ {
+            break;
+        }
+        case 0b010'00:  /* amoor.w */ {
+            break;
+        }
+        case 0b100'00:  /* amomin.w */ {
+            break;
+        }
+        case 0b101'00:  /* amomax.w */ {
+            break;
+        }
+        case 0b110'00:  /* amominu.w */ {
+            break;
+        }
+        case 0b111'00:  /* amomaxu.w */ {
             break;
         }
         default:
@@ -61,6 +114,30 @@ rv_err_t A::execute_normal(uint32_t inst, registers_t& regs, bus_t& bus, inst_ma
     }
     regs.x[0] = 0;
     return res;
+}
+
+void A::listener_write(uint32_t addr, uint32_t offset, void* ptr, size_t len)
+{
+    std::lock_guard lck(m_mtx_revs);
+    if (m_revs.find(addr) == m_revs.end()) return;
+
+    if (len > sizeof(addr) - offset) return;
+
+    bool changed;
+    uint32_t value = 0, newval = 0;
+
+    /* get reserved info */
+    std::tie(value, changed, std::ignore) = m_revs[addr];
+
+    /* build new value */
+    newval = value;
+    memcpy(&newval + offset, ptr, len);
+
+    if (value == newval) return;
+
+    /* update */
+    std::get<0>(m_revs[addr]) = newval;
+    std::get<1>(m_revs[addr]) = true;
 }
 
 }
