@@ -26,7 +26,7 @@ class tester_rv32i
 public:
     using inst_ptr_t = std::shared_ptr<rv32::inst_intf_t>;
 
-    rv::busmgr<uint32_t, std::mutex, std::lock_guard<std::mutex>> busmgr;
+    rv::busmgr<uint32_t> busmgr;
     rv32::inst_intf_t::registers_t regs;
     std::map<std::string, inst_ptr_t> instmap;
 

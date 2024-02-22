@@ -4,11 +4,12 @@
 #include "zmmfly/rv_intf.h"
 #include <string>
 #include <functional>
+#include <mutex>
 
 namespace zmmfly::rv
 {
 
-template<typename T, typename T_mtx, typename T_lock_guard>
+template<typename T, typename T_mtx = std::mutex, typename T_lock_guard = std::lock_guard<std::mutex>>
 class busmgr
 :public bus_mgr_intf<T>
 {
