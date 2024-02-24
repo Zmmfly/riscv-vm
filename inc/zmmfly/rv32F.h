@@ -11,9 +11,11 @@ class F
 {
 
 public:
-    F() {};
+    F();
 
-    rv_err_t execute_normal(uint32_t inst, registers_t& regs, bus_t& bus);
+    std::string name();
+
+    rv_err_t execute_normal(uint32_t inst, registers_t& regs, bus_t& bus, inst_map_t& inst_map);
 };
 
 };

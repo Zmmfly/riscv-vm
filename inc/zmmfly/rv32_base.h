@@ -51,6 +51,16 @@ using inst_type = union inst_type
     }R;
 
     struct {
+        uint32_t opcode   : 7;
+        uint32_t rd       : 5;
+        uint32_t rm       : 3;
+        uint32_t rs1      : 5;
+        uint32_t rs2      : 5;
+        uint32_t fmt      : 2;
+        uint32_t rs3_func5: 5;
+    }R4;
+
+    struct {
         uint32_t opcode: 7;
         uint32_t rd    : 5;
         uint32_t func3 : 3;
