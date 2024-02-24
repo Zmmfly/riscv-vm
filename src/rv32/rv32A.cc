@@ -84,30 +84,159 @@ rv_err_t A::execute_normal(uint32_t inst, registers_t& regs, bus_t& bus, inst_ma
             break;
         }
         case 0b000'01:  /* amoswap.w */ {
+            auto addr = regs.x[iref.R_amo.rs1];
+            // check align
+            if (addr & 0x3) {
+                res = RV_EUNALIGNED;
+                break;
+            }
+
+            // x[rd] = M[x[rs1]]
+            res = bus.read(addr, &regs.x[iref.R_amo.rd], 4);
+            if (res != RV_EOK) break;
+
+            res = bus.write(addr, &regs.x[iref.R_amo.rs2], 4);
+            if (res != RV_EOK) break;
             break;
         }
         case 0b000'00:  /* amoadd.w */ {
+            auto addr = regs.x[iref.R_amo.rs1];
+            // check align
+            if (addr & 0x3) {
+                res = RV_EUNALIGNED;
+                break;
+            }
+
+            // x[rd] = M[x[rs1]]
+            res = bus.read(addr, &regs.x[iref.R_amo.rd], 4);
+            if (res != RV_EOK) break;
+
+            uint32_t t_add = regs.x[iref.R_amo.rd] + regs.x[iref.R_amo.rs2];
+            res = bus.write(addr, &t_add, sizeof(t_add));
+            if (res != RV_EOK) break;
             break;
         }
         case 0b001'00:  /* amoxor.w */ {
+            auto addr = regs.x[iref.R_amo.rs1];
+            // check align
+            if (addr & 0x3) {
+                res = RV_EUNALIGNED;
+                break;
+            }
+
+            // x[rd] = M[x[rs1]]
+            res = bus.read(addr, &regs.x[iref.R_amo.rd], 4);
+            if (res != RV_EOK) break;
+
+            uint32_t t_xor = regs.x[iref.R_amo.rd] ^ regs.x[iref.R_amo.rs2];
+            res = bus.write(addr, &t_xor, sizeof(t_xor));
+            if (res != RV_EOK) break;
             break;
         }
         case 0b011'00:  /* amoand.w */ {
+            auto addr = regs.x[iref.R_amo.rs1];
+            // check align
+            if (addr & 0x3) {
+                res = RV_EUNALIGNED;
+                break;
+            }
+
+            // x[rd] = M[x[rs1]]
+            res = bus.read(addr, &regs.x[iref.R_amo.rd], 4);
+            if (res != RV_EOK) break;
+
+            uint32_t t_and = regs.x[iref.R_amo.rd] & regs.x[iref.R_amo.rs2];
+            res = bus.write(addr, &t_and, sizeof(t_and));
+            if (res != RV_EOK) break;
             break;
         }
         case 0b010'00:  /* amoor.w */ {
+            auto addr = regs.x[iref.R_amo.rs1];
+            // check align
+            if (addr & 0x3) {
+                res = RV_EUNALIGNED;
+                break;
+            }
+
+            // x[rd] = M[x[rs1]]
+            res = bus.read(addr, &regs.x[iref.R_amo.rd], 4);
+            if (res != RV_EOK) break;
+
+            uint32_t t_or = regs.x[iref.R_amo.rd] | regs.x[iref.R_amo.rs2];
+            res = bus.write(addr, &t_or, sizeof(t_or));
+            if (res != RV_EOK) break;
             break;
         }
         case 0b100'00:  /* amomin.w */ {
+            auto addr = regs.x[iref.R_amo.rs1];
+            // check align
+            if (addr & 0x3) {
+                res = RV_EUNALIGNED;
+                break;
+            }
+
+            // x[rd] = M[x[rs1]]
+            res = bus.read(addr, &regs.x[iref.R_amo.rd], 4);
+            if (res != RV_EOK) break;
+
+            uint32_t t_min = (int32_t)regs.x[iref.R_amo.rd] > (int32_t)regs.x[iref.R_amo.rs2] ? 
+                            regs.x[iref.R_amo.rs2] : regs.x[iref.R_amo.rd];
+            res = bus.write(addr, &t_min, sizeof(t_min));
+            if (res != RV_EOK) break;
             break;
         }
         case 0b101'00:  /* amomax.w */ {
+            auto addr = regs.x[iref.R_amo.rs1];
+            // check align
+            if (addr & 0x3) {
+                res = RV_EUNALIGNED;
+                break;
+            }
+
+            // x[rd] = M[x[rs1]]
+            res = bus.read(addr, &regs.x[iref.R_amo.rd], 4);
+            if (res != RV_EOK) break;
+
+            uint32_t t_min = (int32_t)regs.x[iref.R_amo.rd] < (int32_t)regs.x[iref.R_amo.rs2] ? 
+                            regs.x[iref.R_amo.rs2] : regs.x[iref.R_amo.rd];
+            res = bus.write(addr, &t_min, sizeof(t_min));
+            if (res != RV_EOK) break;
             break;
         }
         case 0b110'00:  /* amominu.w */ {
+            auto addr = regs.x[iref.R_amo.rs1];
+            // check align
+            if (addr & 0x3) {
+                res = RV_EUNALIGNED;
+                break;
+            }
+
+            // x[rd] = M[x[rs1]]
+            res = bus.read(addr, &regs.x[iref.R_amo.rd], 4);
+            if (res != RV_EOK) break;
+
+            uint32_t t_minu = regs.x[iref.R_amo.rd] > regs.x[iref.R_amo.rs2] ? 
+                            regs.x[iref.R_amo.rs2] : regs.x[iref.R_amo.rd];
+            res = bus.write(addr, &t_minu, sizeof(t_minu));
+            if (res != RV_EOK) break;
             break;
         }
         case 0b111'00:  /* amomaxu.w */ {
+            auto addr = regs.x[iref.R_amo.rs1];
+            // check align
+            if (addr & 0x3) {
+                res = RV_EUNALIGNED;
+                break;
+            }
+
+            // x[rd] = M[x[rs1]]
+            res = bus.read(addr, &regs.x[iref.R_amo.rd], 4);
+            if (res != RV_EOK) break;
+
+            uint32_t t_maxu = regs.x[iref.R_amo.rd] < regs.x[iref.R_amo.rs2] ? 
+                            regs.x[iref.R_amo.rs2] : regs.x[iref.R_amo.rd];
+            res = bus.write(addr, &t_maxu, sizeof(t_maxu));
+            if (res != RV_EOK) break;
             break;
         }
         default:

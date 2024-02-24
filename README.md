@@ -20,8 +20,8 @@ License: GPL-V3
     - [x] STORE `test pass`
     - [x] SYSTEM `test pass`
   - [x] M `test pass`
-  - ⏳ A
-  - [ ] F
+  - [x] A ``
+  - ⏳ F
   - [ ] D
   - [ ] Zicsr
   - [ ] Zifencei
