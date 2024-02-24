@@ -43,7 +43,8 @@ rv_err_t A::execute_normal(uint32_t inst, registers_t& regs, bus_t& bus, inst_ma
                 m_revs[addr] = std::make_tuple(value, false, listener_id);
 
             } else {
-                auto res = bus.read(addr, &value, 4);
+                // auto res = bus.read(addr, &value, 4);
+                bus.read(addr, &value, 4);
                 std::get<1>(m_revs[addr]) = value;
             }
             regs.x[iref.R_amo.rd] = value;
