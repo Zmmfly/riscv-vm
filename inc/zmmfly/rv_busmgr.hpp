@@ -5,11 +5,20 @@
 #include <string>
 #include <functional>
 #include <mutex>
+#include <memory>
+#include <shared_mutex>
 
 namespace zmmfly::rv
 {
 
-template<typename T, typename T_mtx = std::mutex, typename T_lock_guard = std::lock_guard<std::mutex>>
+template<
+    typename T, 
+    typename T_mtx = std::mutex, 
+    typename T_lock_guard = std::lock_guard<std::mutex>,
+    typename T_mtx_shared = std::shared_mutex,
+    typename T_lock_rd = std::shared_lock<std::shared_mutex>,
+    typename T_lock_wr = std::lock_guard<std::shared_mutex>
+>
 class busmgr
 :public bus_mgr_intf<T>
 {
@@ -61,7 +70,7 @@ public:
             if (!detect_mems(addr, len, mems)) return RV_EBUSFAULT;
         }
 
-        // T_lock_guard lck(m_mtx_mem_rd);
+        T_lock_rd lck(m_mtx_mem_rw);
         size_t cnt = 0;
         uint8_t* p = (uint8_t*)ptr;
         for (auto mem:mems) {
@@ -106,7 +115,7 @@ public:
             if (!detect_mems(addr, len, mems)) return RV_EBUSFAULT;
         }
 
-        // T_lock_guard lck(m_mtx_mem_wr);
+        T_lock_wr lck(m_mtx_mem_rw);
         size_t cnt = 0;
         uint8_t* p = (uint8_t*)ptr;
         for (auto mem:mems) {
@@ -177,7 +186,7 @@ private:
         T& dst_off, T& flt_off, size_t& overlap_len)
     {
         // dst_addr out of flt range
-        if (dst_addr < flt_addr && dst_addr + dst_len < flt_addr || dst_addr >= flt_addr + flt_len) 
+        if ((dst_addr < flt_addr && dst_addr + dst_len < flt_addr) || dst_addr >= flt_addr + flt_len) 
         {
             return false;
         }
@@ -201,7 +210,7 @@ private:
         T      addr_curr = addr;
         size_t rm        = len;
         size_t oplen     = 0;
-        size_t cnt       = 0;
+        // size_t cnt       = 0;
 
         mem_item_t mem;
         do {
@@ -221,7 +230,7 @@ private:
 
             /* increase and decrease */
             rm        -= oplen;
-            cnt       += oplen;
+            // cnt       += oplen;
             addr_curr += oplen;
         }while(rm);
         return false;
@@ -241,7 +250,7 @@ private:
         T      addr_curr = addr;
         size_t rm        = size;
         size_t oplen     = 0;
-        size_t cnt       = 0;
+        // size_t cnt       = 0;
 
         mem_item_t mem;
         mems.clear();
@@ -265,7 +274,7 @@ private:
 
             /* increase and decrease */
             rm        -= oplen;
-            cnt       += oplen;
+            // cnt       += oplen;
             addr_curr += oplen;
         }while(rm);
         return true;
@@ -318,11 +327,11 @@ private:
     std::vector<mem_item_t> m_mems;
     std::map<T, listener_info_t> m_listeners_rd, m_listeners_wr;
     T_mtx m_mtx_mems;
-    T_mtx m_mtx_mem_rd, m_mtx_mem_wr;
+    T_mtx_shared m_mtx_mem_rw;
     T_mtx m_mtx_listen_rd, m_mtx_listen_wr;
-    T m_listen_rd_count = 0;
-    T m_listen_wr_count = 0;
-    bool m_is_ibus = false;
+    T    m_listen_rd_count = 0;
+    T    m_listen_wr_count = 0;
+    bool m_is_ibus         = false;
 };
 
 }
