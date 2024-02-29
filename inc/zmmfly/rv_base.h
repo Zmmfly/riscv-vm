@@ -89,7 +89,7 @@ using inst_type = union inst_type
         uint32_t rs2      : 5;
         uint32_t fmt      : 2;
         uint32_t rs3_func5: 5;
-    }R4;
+    }R_fp;
 
     struct {
         uint32_t opcode: 7;
@@ -109,6 +109,14 @@ using inst_type = union inst_type
         uint32_t rs1   : 5;
         uint32_t imm   : 12;    /* imm[11:0] */
     }I;
+
+    struct {
+        uint32_t opcode: 7;
+        uint32_t rd    : 5;
+        uint32_t width : 3;
+        uint32_t rs1   : 5;
+        uint32_t imm   : 12;    /* imm[11:0] */
+    }I_fp;
 
     struct {
         uint32_t opcode : 7;
