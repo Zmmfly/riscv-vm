@@ -1,7 +1,9 @@
 ﻿#include "zmmfly/rv32I.h"
 
-namespace zmmfly::rv32::v1
+namespace zmmfly::rv32
 {
+
+using namespace rv;
 
 I::I()
 {}

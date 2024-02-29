@@ -4,7 +4,7 @@
 #include "zmmfly/rv32_base.h"
 #include <mutex>
 
-namespace zmmfly::rv32::v1
+namespace zmmfly::rv32
 {
 
 class A

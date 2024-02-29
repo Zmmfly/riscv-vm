@@ -1,7 +1,10 @@
 #include "zmmfly/rv32M.h"
 
-namespace zmmfly::rv32::v1
+namespace zmmfly::rv32
 {
+
+using namespace rv;
+
 M::M()
 {}
 
