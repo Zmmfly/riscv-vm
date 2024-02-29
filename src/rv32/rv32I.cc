@@ -65,7 +65,7 @@ rv_err_t I::execute_normal(uint32_t inst, registers_t& regs, bus_t& bus, inst_ma
         case 0b00'011'11:   /* MISC-MEM */ {
             if (iref.fence.func3 != 0b000 || iref.fence.rd != 0 || iref.fence.rs1 != 0) break;
             /* FENCE */
-            if (m_fence)m_fence(iref);
+            if (m_fence)m_fence(iref.u32);
             res = RV_EOK;
             break;
         }
@@ -340,9 +340,9 @@ rv_err_t I::execute_normal(uint32_t inst, registers_t& regs, bus_t& bus, inst_ma
         case 0b11'100'11: { /* SYSTEM */
             if (iref.I.func3 != 0b000) break;
             if (iref.I.imm == 0) {              /* I ECALL */
-                if (m_ecall) m_ecall(iref);
+                if (m_ecall) m_ecall(iref.u32);
             } else if (iref.I.imm == 1) {       /* I EBREAK */
-                if (m_ebreak) m_ebreak(iref);
+                if (m_ebreak) m_ebreak(iref.u32);
             }
             res = RV_EOK;
             break;
@@ -353,27 +353,13 @@ rv_err_t I::execute_normal(uint32_t inst, registers_t& regs, bus_t& bus, inst_ma
     return res;
 }
 
-rv_err_t I::set(std::string k, std::any v)
+rv_err_t I::on(std::string k, vcall_t fn)
 {
-    rv_err_t res = RV_EUNSUPPORTED;
-    if (k == "ecall" && v.type() == typeid(ext_call_t))
-    {
-        m_ecall = std::any_cast<ext_call_t>(v);
-        res = RV_EOK;
-    }
-
-    if (k == "ebreak" && v.type() == typeid(ext_call_t))
-    {
-        m_ebreak = std::any_cast<ext_call_t>(v);
-        res = RV_EOK;
-    }
-
-    if (k == "fence" && v.type() == typeid(ext_call_t))
-    {
-        m_fence = std::any_cast<ext_call_t>(v);
-        res = RV_EOK;
-    }
-    return res;
+    if      (k == "ecall")  m_ecall  = fn;
+    else if (k == "ebreak") m_ebreak = fn;
+    else if (k == "fence")  m_fence  = fn;
+    else return RV_EUNSUPPORTED;
+    return RV_EOK;
 }
 
 };

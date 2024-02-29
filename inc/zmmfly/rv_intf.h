@@ -103,6 +103,7 @@ public:
     using registers_t = registers<T>;
     using bus_intf_t  = bus_intf<T>;
     using inst_map_t  = std::map<std::string, std::shared_ptr<inst_intf<T>>>;
+    using vcall_t     = std::function<void(T)>;
 
     virtual ~inst_intf() {};
 
@@ -126,27 +127,87 @@ public:
     }
 
     /**
-     * @brief Set any value
+     * @brief Set str:str kv
      * 
      * @param k 
      * @param v 
      * @return rv_err_t 
      */
-    virtual rv_err_t set(std::string k, std::any v) 
+    virtual rv_err_t set(std::string k, std::string v) 
     {
         return RV_EUNSUPPORTED;
     }
 
     /**
-     * @brief Get any value
+     * @brief Get str:str kv
      * 
      * @param k 
      * @param v use pointer as std::any to get value
      * @return rv_err_t 
      */
-    virtual rv_err_t get(std::string k, std::any v) 
+    virtual rv_err_t get(std::string k, std::string& v) 
     {
         return RV_EUNSUPPORTED; 
+    }
+
+    /**
+     * @brief Set str:T kv
+     * 
+     * @param k 
+     * @param v 
+     * @return rv_err_t 
+     */
+    virtual rv_err_t set(std::string k, T v)
+    {
+        return RV_EUNSUPPORTED;
+    }
+
+    /**
+     * @brief Get str:T kv
+     * 
+     * @param k 
+     * @param v 
+     * @return rv_err_t 
+     */
+    virtual rv_err_t get(std::string k, T& v)
+    {
+        return RV_EUNSUPPORTED;
+    }
+
+    /**
+     * @brief Set t:t kv
+     * 
+     * @param k 
+     * @param v 
+     * @return rv_err_t 
+     */
+    virtual rv_err_t set(T k, T v)
+    {
+        return RV_EUNSUPPORTED;
+    }
+
+    /**
+     * @brief Get t:t kv
+     * 
+     * @param k 
+     * @param v 
+     * @return rv_err_t 
+     */
+    virtual rv_err_t get(T k, T& v)
+    {
+        return RV_EUNSUPPORTED;
+    }
+
+    /**
+     * @brief Set on instruction event callback, usually for special instruction
+     * 
+     * @param key 
+     * @param fn 
+     * @return rv_err_t 
+     */
+    virtual rv_err_t on(std::string key, vcall_t fn)
+    {
+        return RV_EUNSUPPORTED;
     }
 
     /**

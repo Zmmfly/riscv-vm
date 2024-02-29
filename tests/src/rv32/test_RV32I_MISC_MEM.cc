@@ -32,7 +32,7 @@ TEST(MISC_MEM, FENCE)
 
     bool called = false;
 
-    test.instmap["I"]->set("fence", zmmfly::rv32::v1::I::ext_call_t([&called](zmmfly::rv32::inst_type inst){
+    test.instmap["I"]->on("fence", zmmfly::rv32::inst_intf_t::vcall_t([&called](uint32_t inst){
         called = true;
     }));
 

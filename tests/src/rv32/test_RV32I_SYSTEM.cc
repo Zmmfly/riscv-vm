@@ -33,7 +33,7 @@ TEST(SYSTEM, ECALL)
 
     bool called = false;
 
-    test.instmap["I"]->set("ecall", zmmfly::rv32::v1::I::ext_call_t([&called](zmmfly::rv32::inst_type inst){
+    test.instmap["I"]->on("ecall", zmmfly::rv32::inst_intf_t::vcall_t([&called](uint32_t inst){
         called = true;
     }));
 
@@ -59,7 +59,7 @@ TEST(SYSTEM, EBREAK)
 
     bool called = false;
 
-    test.instmap["I"]->set("ebreak", zmmfly::rv32::v1::I::ext_call_t([&called](zmmfly::rv32::inst_type inst){
+    test.instmap["I"]->on("ebreak", zmmfly::rv32::inst_intf_t::vcall_t([&called](uint32_t inst){
         called = true;
     }));
 
