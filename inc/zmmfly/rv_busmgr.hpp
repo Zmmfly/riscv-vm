@@ -13,11 +13,11 @@ namespace zmmfly::rv
 
 template<
     typename T, 
-    typename T_mtx = std::mutex, 
+    typename T_mtx        = std::mutex,
     typename T_lock_guard = std::lock_guard<std::mutex>,
     typename T_mtx_shared = std::shared_mutex,
-    typename T_lock_rd = std::shared_lock<std::shared_mutex>,
-    typename T_lock_wr = std::lock_guard<std::shared_mutex>
+    typename T_lock_rd    = std::shared_lock<std::shared_mutex>,
+    typename T_lock_wr    = std::lock_guard<std::shared_mutex>
 >
 class busmgr
 :public bus_mgr_intf<T>
