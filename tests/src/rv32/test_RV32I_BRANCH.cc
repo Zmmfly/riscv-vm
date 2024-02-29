@@ -6,7 +6,7 @@
 #include <fmt/core.h>
 
 tester_rv32i tester;
-zmmfly::rv32::inst_type inst;
+zmmfly::rv::inst_type inst;
 
 int main(int argc, char** argv)
 {
@@ -19,7 +19,7 @@ int main(int argc, char** argv)
 /*
 TEST(BRANCH, template)
 {
-    rv32::instB_imm v;
+    rv::instB_imm v;
     tester.reset();
     tester.m_mem->reset();
 
@@ -49,7 +49,7 @@ TEST(BRANCH, template)
 
 TEST(BRANCH, BGEU)
 {
-    rv32::instB_imm v;
+    rv::instB_imm v;
     tester.reset();
     tester.m_mem->reset();
 
@@ -78,7 +78,7 @@ TEST(BRANCH, BGEU)
 
 TEST(BRANCH, BLTU)
 {
-    rv32::instB_imm v;
+    rv::instB_imm v;
     tester.reset();
     tester.m_mem->reset();
 
@@ -115,7 +115,7 @@ TEST(BRANCH, BLTU)
 
 TEST(BRANCH, BGE)
 {
-    rv32::instB_imm v;
+    rv::instB_imm v;
     tester.reset();
     tester.m_mem->reset();
 
@@ -144,7 +144,7 @@ TEST(BRANCH, BGE)
 
 TEST(BRANCH, BLT)
 {
-    rv32::instB_imm v;
+    rv::instB_imm v;
     tester.reset();
     tester.m_mem->reset();
 
@@ -173,7 +173,7 @@ TEST(BRANCH, BLT)
 
 TEST(BRANCH, BNE)
 {
-    rv32::instB_imm v;
+    rv::instB_imm v;
     tester.reset();
     tester.m_mem->reset();
 
@@ -210,7 +210,7 @@ TEST(BRANCH, BNE)
 
 TEST(BRANCH, BEQ)
 {
-    rv32::instB_imm v;
+    rv::instB_imm v;
     tester.reset();
     tester.m_mem->reset();
 

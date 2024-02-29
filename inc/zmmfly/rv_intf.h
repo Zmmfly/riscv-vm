@@ -2,7 +2,7 @@
 #define __ZMMFLY_RV_INTF_H__
 
 #include "zmmfly/rv_defs.h"
-#include "zmmfly/rv_registers.h"
+#include "zmmfly/rv_base.h"
 
 namespace zmmfly::rv
 {

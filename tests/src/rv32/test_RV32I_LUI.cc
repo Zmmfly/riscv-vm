@@ -6,7 +6,7 @@
 #include <fmt/core.h>
 
 tester_rv32i tester;
-zmmfly::rv32::inst_type inst;
+zmmfly::rv::inst_type inst;
 
 int main(int argc, char** argv)
 {
