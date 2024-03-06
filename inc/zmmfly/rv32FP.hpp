@@ -16,36 +16,48 @@ using fp_type = enum fp_type
     FP128 = 0b11,
 };
 
+template<fp_type type=FP32, typename Twidth=uint32_t>
 class FP
-: public inst_intf_t
+: public rv::inst_intf<Twidth>
 {
 
 public:
-    FP(fp_type t = FP32):m_type(t) {}
+    FP():{}
 
     std::string name()
     {
-        switch(m_type) {
-            case FP32 : return "F";
-            case FP64 : return "D";
-            case FP16 : return "Zfh";
-            case FP128: return "Q";
-        }
+        if constexpr (type == FP32) return "F";
+        else if constexpr (type == FP64) return "D";
+        else if constexpr (type == FP16) return "Zfh";
+        else if constexpr (type == FP128) return "Q";
+        else "Unknown";
     }
 
-    rv_err_t execute_normal(uint32_t inst, registers_t& regs, bus_t& bus, inst_map_t& inst_map)
+    rv_err_t execute_normal(uint32_t inst, registers_t& regs, bus_intf_t& bus, inst_map_t& inst_map)
     {
         rv_err_t res = RV_EUNSUPPORTED;
         inst_type& iref = reinterpret_cast<inst_type&>(inst);
         regs.x[0] = 0;
         do {
             /* check fmt, in future: resue for other float extension, like D */
-            if (iref.R_fp.fmt != 0b00) break;
+            // if (iref.R_fp.fmt != 0b00) break;
 
-            if (iref.opcode == 0b00'001'11) {   /* I flw */
+            if (iref.opcode == 0b00'001'11) {   /* I float load */
+                auto addr = regs.x[iref.I.rs1] + rv::sext<Twidth>(iref.I.imm, 12);
+                uint32_t v = 0;
+                res = bus.read(addr, &v, 4);
+                if (res != RV_EOK) break;
+                regs.f[iref.I.rd].u64 = (regs.f[iref.I.rd].u64 & 0xffffffff) | v;
             }
 
             else if (iref.opcode == 0b01'001'11) {  /* S fsw */
+                instS_imm imm;
+                imm.imm11_5 = iref.S.imm11_5;
+                imm.imm4_0  = iref.S.imm4_0;
+
+                auto addr = regs.x[iref.S.rs1] + rv::sext<uint32_t>(imm.imm, 12);
+                uint32_t v = regs.f[iref.S.rs2].u64 & 0xffffffff;
+                res = bus.write(addr, &v, 4);
             }
 
             else if (iref.opcode == 0b10'000'11) {  /* R4 fmadd */
@@ -171,9 +183,6 @@ public:
         regs.x[0] = 0;
         return res;
     }
-
-private:
-    fp_type m_type;
 };
 
 };

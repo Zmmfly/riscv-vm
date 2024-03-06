@@ -8,11 +8,11 @@ namespace zmmfly::rv
 {
 
 template<typename T>
-class bus_intf
+class mem_intf
 {
 
 public:
-    virtual ~bus_intf() {};
+    virtual ~mem_intf() {};
 
     virtual rv_err_t read(T offset, void* ptr, size_t len)  = 0;
     virtual rv_err_t write(T offset, void* ptr, size_t len) = 0;
@@ -24,12 +24,12 @@ public:
  * @tparam T CPU width type, uint32_t or uint64_t
  */
 template<typename T>
-class bus_mgr_intf{
+class bus_intf{
 public:
     using listener_t      = std::function<void(T addr, T offset, void* ptr, size_t len)> ;
     using listener_info_t = std::tuple<T, size_t, listener_t> ;
 
-    virtual ~bus_mgr_intf() {};
+    virtual ~bus_intf() {};
 
     /**
      * @brief Mount memory to bus
