@@ -20,16 +20,16 @@ template<
     typename T_lock_wr    = std::lock_guard<std::shared_mutex>
 >
 class busmgr
-:public bus_mgr_intf<T>
+:public bus_intf<T>
 {
 public:
     using op_arg_t          = std::tuple<std::string, std::any>;
-    using bus_intf_ptr_t    = std::shared_ptr<bus_intf<T>>;
+    using bus_intf_ptr_t    = std::shared_ptr<mem_intf<T>>;
     using mem_item_t        = std::tuple<T, size_t, bus_intf_ptr_t>;
     using mem_target_item_t = std::tuple<bus_intf_ptr_t, T, size_t>;   /* buf interface, offset, size */
     using mem_targets_t     = std::vector<mem_target_item_t>;
-    using listener_t        = bus_mgr_intf<T>::listener_t;
-    using listener_info_t   = bus_mgr_intf<T>::listener_info_t;
+    using listener_t        = bus_intf<T>::listener_t;
+    using listener_info_t   = bus_intf<T>::listener_info_t;
 
     busmgr(bool is_ibus = false)
     {

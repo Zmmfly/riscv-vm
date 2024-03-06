@@ -39,7 +39,7 @@ public:
      * @param mem 
      * @return rv_err_t 
      */
-    virtual rv_err_t mount(T addr, size_t size, std::shared_ptr<bus_intf<T>> mem) = 0;
+    virtual rv_err_t mount(T addr, size_t size, std::shared_ptr<mem_intf<T>> mem) = 0;
 
     /**
      * @brief Read memory from bus
@@ -219,7 +219,7 @@ public:
      * @param inst_map
      * @return rv_err_t 
      */
-    virtual rv_err_t execute_normal(T inst, registers_t& regs, bus_mgr_intf<T>& dbus, inst_map_t& inst_map) 
+    virtual rv_err_t execute_normal(T inst, registers_t& regs, bus_intf_t& dbus, inst_map_t& inst_map) 
     {
         return RV_EUNSUPPORTED; 
     };
@@ -233,7 +233,7 @@ public:
      * @param inst_map
      * @return rv_err_t 
      */
-    virtual rv_err_t execute_compr(uint16_t inst, registers_t& regs, bus_mgr_intf<T>& dbus, inst_map_t& inst_map)
+    virtual rv_err_t execute_compr(uint16_t inst, registers_t& regs, bus_intf_t& dbus, inst_map_t& inst_map)
     {
         return RV_EUNSUPPORTED;
     };
