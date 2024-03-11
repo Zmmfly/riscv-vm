@@ -48,7 +48,9 @@ public:
 
                 } else if (iref.func3 == 0b011) { // mulhu
                     // x[rd] = ((u64) x[rs1] * (u64) x[rs2]) >> XLEN
-                    regs.x[iref.R.rd] = ( (uint64_t)regs.x[iref.R.rs1] * (uint64_t)regs.x[iref.R.rs2] ) >> 32;
+                    // regs.x[iref.R.rd] = ( (uint64_t)regs.x[iref.R.rs1] * (uint64_t)regs.x[iref.R.rs2] ) >> 32;
+                    T lo;
+                    mul_unsigned(regs.x[iref.R.rs1], regs.x[iref.R.rs2], lo, regs.x[iref.R.rd]);
                     res = RV_EOK;
 
                 } else if (iref.func3 == 0b100) { // div
