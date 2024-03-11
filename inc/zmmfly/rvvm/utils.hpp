@@ -50,8 +50,8 @@ void mul_unsigned(T a, T b, T& low, T& high)
     high = ahbh + (albh >> (sizeof(T) * 4)) + ( ahbl >> (sizeof(T) * 4) ) + (middle_sum >> (sizeof(T) * 4));
 }
 
-template<typename T>
-void mul_signed(T a, T b, T& low, T& high) {
+template<typename T, typename T_out>
+void mul_signed(T a, T b, T_out& low, T_out& high) {
     static_assert(std::is_signed<T>::value, "T must be a signed type.");
 
     using U = typename std::make_unsigned<T>::type;
@@ -69,8 +69,33 @@ void mul_signed(T a, T b, T& low, T& high) {
         u_high = ~u_high + (u_low == 0 ? 1 : 0);
     }
 
-    low = static_cast<T>(u_low);
-    high = static_cast<T>(u_high);
+    low = reinterpret_cast<T_out>(u_low);
+    high = reinterpret_cast<T_out>(u_high);
+}
+
+template<typename T_signed, typename T_unsigned>
+void mul_signed_unsigned(T_signed a, T_unsigned b, T_signed& low, T_signed& high) {
+    static_assert(std::is_unsigned<T_unsigned>::value, "T_unsigned must be an unsigned type.");
+    static_assert(std::is_signed<T_signed>::value, "T_signed must be a signed type.");
+
+    using U = typename std::make_unsigned<T_signed>::type;
+
+    bool negative = (a < 0);
+    U ua = (a < 0) ? static_cast<U>(-a) : static_cast<U>(a);
+    U ub = b; // No conversion needed, b is already unsigned
+
+    U u_low, u_high;
+    mul_unsigned(ua, ub, u_low, u_high); // 使用无符号乘法函数
+
+    if (negative) {
+        // 如果结果为负，取补码
+        u_low = ~u_low + 1;
+        u_high = ~u_high + (u_low == 0 ? 1 : 0);
+    }
+
+    // 强制转换无符号结果到有符号类型
+    low = static_cast<T_signed>(u_low);
+    high = static_cast<T_signed>(u_high);
 }
 
 }

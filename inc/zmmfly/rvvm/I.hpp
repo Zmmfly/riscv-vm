@@ -7,22 +7,15 @@
 namespace Zmmfly::rvvm
 {
 
-template<typename T=uint32_t, typename T_sign=int32_t>
+template<typename T=uint32_t>
 class I
 :public inst_intf<T>
 {
 public:
-    static_assert(std::is_integral<T>::value && std::is_integral<T_sign>::value,
-                "T and T_sign must be integral types");
-    
-    static_assert(sizeof(T) == sizeof(T_sign),
-                "Widths of T and T_sign are not equal");
-    
     static_assert(std::is_same<T, uint32_t>::value || std::is_same<T, uint64_t>, 
                 "T must be uint32_t or uint64_t");
 
-    static_assert(std::is_same<T_sign, int32_t>::value || std::is_same<T_sign, int64_t>, 
-                "T_sign must be int32_t or int64_t");
+    using T_sign = typename std::make_signed<T>::type;
 
     I(){};
     std::string name() {return "I";}

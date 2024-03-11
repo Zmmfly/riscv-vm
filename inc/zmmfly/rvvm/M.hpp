@@ -3,26 +3,20 @@
 
 #include "Zmmfly/rvvm/defs.hpp"
 #include "Zmmfly/rvvm/intf.hpp"
+#include "Zmmfly/rvvm/utils.hpp"
 
 namespace Zmmfly::rvvm
 {
 
-template<typename T=uint32_t, typename T_sign=int32_t>
+template<typename T=uint32_t>
 class M
 :public inst_intf<T>
 {
 public:
-    static_assert(std::is_unsigned<T>::value && std::is_integral<T_sign>::value,
-                "T and T_sign must be correct types");
-    
-    static_assert(sizeof(T) == sizeof(T_sign),
-                "Widths of T and T_sign are not equal");
-    
     static_assert(std::is_same<T, uint32_t>::value || std::is_same<T, uint64_t>, 
                 "T must be uint32_t or uint64_t");
 
-    static_assert(std::is_same<T_sign, int32_t>::value || std::is_same<T_sign, int64_t>, 
-                "T_sign must be int32_t or int64_t");
+    using T_sign = typename std::make_signed<T>::type;
 
     M(){};
     std::string name() {return "M";}
@@ -41,13 +35,15 @@ public:
 
                 } else if (iref.func3 == 0b001) { // mulh
                     // x[rd] = ((s64) x[rs1] * (s64) x[rs2]) >> XLEN
-                    // regs.x[iref.R.rd] = ( (int64_t)regs.x[iref.R.rs1] * (int64_t)regs.x[iref.R.rs2] ) >> 32;
-                    regs.x[iref.R.rd] = ( rv::sext<int64_t>(regs.x[iref.R.rs1], 32) * rv::sext<int64_t>(regs.x[iref.R.rs2], 32) ) >> 32;
+                    T_sign lo;
+                    mul_signed(reinterpret_cast<T_sign>(regs.x[iref.R.rs1]), reinterpret_cast<T_sign>(regs.x[iref.R.rs2]), lo, reinterpret_cast<T_sign&>(regs.x[iref.R.rd]));
                     res = RV_EOK;
 
                 } else if (iref.func3 == 0b010) { // mulhsu
                     // x[rd] = ((s64) x[rs1] * (u64) x[rs2]) >> XLEN
-                    regs.x[iref.R.rd] = ( rv::sext<int64_t>(regs.x[iref.R.rs1], 32) * (uint64_t)regs.x[iref.R.rs2] ) >> 32;
+                    // regs.x[iref.R.rd] = ( rv::sext<int64_t>(regs.x[iref.R.rs1], 32) * (uint64_t)regs.x[iref.R.rs2] ) >> 32;
+                    T_sign lo;
+                    mul_signed_unsigned(reinterpret_cast<T_sign>(regs.x[iref.R.rs1]), regs.x[iref.R.rs2], lo, reinterpret_cast<T_sign&>(regs.x[iref.R.rd]));
                     res = RV_EOK;
 
                 } else if (iref.func3 == 0b011) { // mulhu
