@@ -25,7 +25,7 @@ public:
      * @param len read length
      * @return err_t 
      */
-    virtual err_t read(T offset, void* ptr, size_t len)  = 0;
+    virtual err_t read(T offset, void* ptr, T len)  = 0;
 
     /**
      * @brief Memory write
@@ -35,7 +35,7 @@ public:
      * @param len write length
      * @return err_t 
      */
-    virtual err_t write(T offset, void* ptr, size_t len) = 0;
+    virtual err_t write(T offset, void* ptr, T len) = 0;
 };
 
 /**
@@ -46,8 +46,8 @@ public:
 template<typename T>
 class bus_intf{
 public:
-    using listener_t      = std::function<void(T addr, T offset, void* ptr, size_t len)> ;
-    using listener_info_t = std::tuple<T, size_t, listener_t> ;
+    using listener_t      = std::function<void(T addr, T offset, void* ptr, T len)> ;
+    using listener_info_t = std::tuple<T, T, listener_t> ;
 
     virtual ~bus_intf() {};
 
@@ -59,7 +59,7 @@ public:
      * @param mem 
      * @return err_t 
      */
-    virtual err_t mount(T addr, size_t size, std::shared_ptr<bus_intf<T>> mem) = 0;
+    virtual err_t mount(T addr, T size, std::shared_ptr<bus_intf<T>> mem) = 0;
 
     /**
      * @brief Read memory from bus
@@ -70,7 +70,7 @@ public:
      * @param arg
      * @return err_t 
      */
-    virtual err_t read(T addr, void* ptr, size_t len, std::any arg = {})  = 0;
+    virtual err_t read(T addr, void* ptr, T len, std::any arg = {})  = 0;
 
     /**
      * @brief Listen read
@@ -81,7 +81,7 @@ public:
      * @param listen_id listen id
      * @return err_t 
      */
-    virtual err_t read_listen(T addr, size_t len, listener_t fn, T& listen_id) = 0;
+    virtual err_t read_listen(T addr, T len, listener_t fn, T& listen_id) = 0;
 
     /**
      * @brief Unlisten read
@@ -100,9 +100,9 @@ public:
      * @param arg 
      * @return err_t 
      */
-    virtual err_t write(T addr, void* ptr, size_t len, std::any arg = {}) = 0;
+    virtual err_t write(T addr, void* ptr, T len, std::any arg = {}) = 0;
 
-    virtual err_t write_listen(T addr, size_t len, listener_t fn, T& listen_id) = 0;
+    virtual err_t write_listen(T addr, T len, listener_t fn, T& listen_id) = 0;
 
     virtual err_t write_unlisten(T listen_id) = 0;
 
