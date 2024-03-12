@@ -28,6 +28,23 @@ using err_t = enum err_t
 };
 
 #pragma pack(push, 1)
+
+typedef union fp32_t
+{
+    uint8_t u8[4];
+    uint16_t u16[2];
+    uint32_t u32;
+    float f32;
+}fp32_t;
+
+typedef union fp64_t
+{
+    uint8_t u8[8];
+    uint16_t u16[4];
+    uint32_t u32[2];
+    double fp64;
+}fp64_t;
+
 template<typename T>
 struct regs_t
 {
