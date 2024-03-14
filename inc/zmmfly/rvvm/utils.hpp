@@ -2,6 +2,7 @@
 #define __ZMMFLY_RVVM_UTILS_H__
 
 #include <cstdint>
+#include "Zmmfly/rvvm/defs.hpp"
 
 namespace Zmmfly::rvvm
 {
@@ -96,6 +97,38 @@ void mul_signed_unsigned(T_signed a, T_unsigned b, T_signed& low, T_signed& high
     // 强制转换无符号结果到有符号类型
     low = static_cast<T_signed>(u_low);
     high = static_cast<T_signed>(u_high);
+}
+
+typedef enum fp_class_t
+{
+    F_NINF = 0, /* Negative infinite */
+    F_NNORM,    /* Negative normal */
+    F_NSUBNORM, /* Negative sub normal */
+    F_NZERO,    /* Negative zero */
+    F_PZERO,    /* Positive zero */
+    F_PSUBNORM, /* Positive sub normal */
+    F_PNORM,    /* Positive normal */
+    F_PINF,     /* Postive infinite */
+    F_SNAN,     /* Signaling NaN */
+    F_QNAN,     /* Quiet NaN */
+}fp_class_t;
+
+template<typename T>
+fp_class_t fclass(T n)
+{
+    static_assert(std::is_same<T, uint32_t>::value || std::is_same<T, uint64_t>::value,
+    "Template parameter T must be uint32_t or uint64_t");
+    T e = 0, m = 0, e_msk = 0, m_msk = 0;
+    if constexpr(sizeof(T) == 4) {
+        auto &ref = reinterpret_cast<fp32_t&>(n);
+        e_msk = ((1<<8) - 1);
+        m_msk = ((1<<23) - 1);
+    }
+    else if constexpr(sizeof(T) == 8) {
+        auto &ref = reinterpret_cast<fp64_t&>(n);
+        e_msk = ((1<<11) - 1);
+        m_msk = ((1<<52) - 1);
+    }
 }
 
 }
