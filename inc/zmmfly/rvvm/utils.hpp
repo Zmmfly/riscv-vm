@@ -131,6 +131,50 @@ fp_class_t fclass(T n)
     }
 }
 
+/**
+ * @brief Long div
+ * @ref https://www.cnblogs.com/PeaZomboss/p/17803921.html
+ * 
+ * @tparam T 
+ * @param dividend_high 
+ * @param dividend_low 
+ * @param divisor 
+ * @param quotient 
+ * @param remainder 
+ * @return true div not with zero
+ * @return false div with zero
+ */
+template<typename T>
+bool long_div(T dividend_high, T dividend_low, T divisor, T& quotient, T* remainder) 
+{
+    static_assert(std::is_unsigned<T>::value, "Template parameter must be an unsigned type.");
+    if (divisor == 0) return false;
+
+    const int bits = sizeof(T) * 8;
+    T x = dividend_high;
+    T y = dividend_low;
+    T t = 0;
+    quotient = 0;
+
+    for (int i = 0; i < bits; ++i) {
+        // 模拟被除数*2（左移一位）
+        t = x >> (bits-1); // 获取x的最高位
+        x = (x << 1) | (y >> (bits - 1)); // x左移一位，y的最高位补到x的最低位
+        y <<= 1;
+
+        // 如果x大于等于除数，从x中减去除数，并将结果的最低位设为1（模拟商的累加）
+        if (x >= divisor - t) {
+            x -= divisor;
+            y += 1;
+        }
+    }
+
+    if (remainder) *remainder = x; // 将最后的x作为余数
+    
+    quotient = y; // 最后的y即为商
+    return true;
+}
+
 }
 
 #endif /* __ZMMFLY_RVVM_UTILS_H__ */
