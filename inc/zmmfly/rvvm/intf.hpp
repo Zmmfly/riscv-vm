@@ -67,29 +67,9 @@ public:
      * @param addr 
      * @param ptr 
      * @param len 
-     * @param arg
      * @return err_t 
      */
-    virtual err_t read(T addr, void* ptr, T len, std::any arg = {})  = 0;
-
-    /**
-     * @brief Listen read
-     * 
-     * @param addr listen address of begin
-     * @param len listen length
-     * @param fn listen callback, the first arg is addr, second is ptr, third is size
-     * @param listen_id listen id
-     * @return err_t 
-     */
-    virtual err_t read_listen(T addr, T len, listener_t fn, T& listen_id) = 0;
-
-    /**
-     * @brief Unlisten read
-     * 
-     * @param listen_id 
-     * @return err_t 
-     */
-    virtual err_t read_unlisten(T listen_id) = 0;
+    virtual err_t read(T addr, void* ptr, T len)  = 0;
 
     /**
      * @brief Write memory to bus
@@ -97,23 +77,21 @@ public:
      * @param addr 
      * @param ptr 
      * @param len
-     * @param arg 
      * @return err_t 
      */
-    virtual err_t write(T addr, void* ptr, T len, std::any arg = {}) = 0;
-
-    virtual err_t write_listen(T addr, T len, listener_t fn, T& listen_id) = 0;
-
-    virtual err_t write_unlisten(T listen_id) = 0;
+    virtual err_t write(T addr, void* ptr, T len) = 0;
 
     /**
-     * @brief Set any value
+     * @brief Lock the bus
      * 
-     * @param k 
-     * @param v 
-     * @return err_t 
      */
-    virtual err_t set(std::string k, std::any v) = 0;
+    virtual void lock() = 0;
+
+    /**
+     * @brief Unlock the bus
+     * 
+     */
+    virtual void unlock() = 0;
 };
 
 /**
