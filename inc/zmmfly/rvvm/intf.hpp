@@ -62,6 +62,22 @@ public:
     virtual err_t mount(T addr, T size, std::shared_ptr<bus_intf<T>> mem) = 0;
 
     /**
+     * @brief Unmount mem by addr and size
+     * 
+     * @param addr 
+     * @param size 
+     * @return err_t 
+     */
+    virtual err_t unmount(T addr, T size) = 0;
+
+    /**
+     * @brief Unmount mem by mem intf
+     * 
+     * @return err_t 
+     */
+    virtual err_t unmount(std::shared_ptr<bus_intf<T>> mem) = 0;
+
+    /**
      * @brief Read memory from bus
      * 
      * @param addr 
