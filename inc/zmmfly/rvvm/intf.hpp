@@ -46,8 +46,8 @@ public:
 template<typename T>
 class bus_intf{
 public:
-    using listener_t      = std::function<void(T addr, T offset, void* ptr, T len)> ;
-    using listener_info_t = std::tuple<T, T, listener_t> ;
+    using listen_call_t = std::function<bool(T addr, void* ptr, T len, T last_listen_id, bool last_hooked, bool before_op)>;
+    using listen_info_t = std::tuple<T, T, listen_call_t>;
 
     virtual ~bus_intf() {};
 
@@ -59,7 +59,7 @@ public:
      * @param mem 
      * @return err_t 
      */
-    virtual err_t mount(T addr, T size, std::shared_ptr<bus_intf<T>> mem) = 0;
+    virtual err_t mount(T addr, T size, std::shared_ptr<mem_intf<T>> mem) = 0;
 
     /**
      * @brief Unmount mem by addr and size
@@ -75,7 +75,37 @@ public:
      * 
      * @return err_t 
      */
-    virtual err_t unmount(std::shared_ptr<bus_intf<T>> mem) = 0;
+    virtual err_t unmount(std::shared_ptr<mem_intf<T>> mem) = 0;
+
+    virtual err_t listen_read(T addr, T size, listen_call_t call, T& listen_id)
+    {
+        return RV_EUNSUPPORTED;
+    }
+
+    virtual err_t listen_write(T addr, T size, listen_call_t call, T& listen_id)
+    {
+        return RV_EUNSUPPORTED;
+    }
+
+    virtual err_t unlisten_read(T listen_id)
+    {
+        return RV_EUNSUPPORTED;
+    }
+
+    virtual err_t unlisten_read(T addr, T size)
+    {
+        return RV_EUNSUPPORTED;
+    }
+
+    virtual err_t unlisten_write(T listen_id)
+    {
+        return RV_EUNSUPPORTED;
+    }
+
+    virtual err_t unlisten_write(T addr, T size)
+    {
+        return RV_EUNSUPPORTED;
+    }
 
     /**
      * @brief Read memory from bus
@@ -98,13 +128,13 @@ public:
     virtual err_t write(T addr, void* ptr, T len) = 0;
 
     /**
-     * @brief Lock the bus
+     * @brief Lock the bus, ths lock must could call recursived
      * 
      */
     virtual void lock() = 0;
 
     /**
-     * @brief Unlock the bus
+     * @brief Unlock the bus, ths lock must could call recursived
      * 
      */
     virtual void unlock() = 0;
